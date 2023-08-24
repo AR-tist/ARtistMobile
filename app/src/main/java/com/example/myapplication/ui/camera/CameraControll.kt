@@ -4,24 +4,24 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.camera.core.AspectRatio
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
+import androidx.camera.core.UseCaseGroup
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.LifecycleOwner
 import com.example.myapplication.HandLandmarkerHelper
 import com.google.mediapipe.tasks.vision.core.RunningMode
-
 import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
 
-class Camera (private var context : Context, private var viewModel: CameraViewModel){
+
+class CameraControll (private var context : Context, private var viewModel: CameraViewModel, private var lifecycleOwner: LifecycleOwner, private var surfaceProvider: Preview.SurfaceProvider){
     lateinit var handLandmarkerHelper: HandLandmarkerHelper
 
-    private var _fragmentCameraBinding: FragmentCameraBinding? = null
-
-    private val fragmentCameraBinding
-        get() = _fragmentCameraBinding!!
 
     private var imageAnalyzer: ImageAnalysis? = null
     private var preview: Preview? = null
@@ -29,18 +29,24 @@ class Camera (private var context : Context, private var viewModel: CameraViewMo
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraFacing = CameraSelector.LENS_FACING_FRONT
 
+    private lateinit var backgroundExecutor: ExecutorService
+
 //    private lateinit var backgroundExecutor: ExecutorService
     init{
+        backgroundExecutor = Executors.newSingleThreadExecutor()
         setUpCamera()
-        handLandmarkerHelper = HandLandmarkerHelper(
-            context = context,
-            runningMode = RunningMode.LIVE_STREAM,
-            minHandDetectionConfidence = viewModel.currentMinHandDetectionConfidence,
-            minHandTrackingConfidence = viewModel.currentMinHandTrackingConfidence,
-            minHandPresenceConfidence = viewModel.currentMinHandPresenceConfidence,
-            maxNumHands = viewModel.currentMaxHands,
-            currentDelegate = viewModel.currentDelegate
-        )
+
+        backgroundExecutor.execute {
+            handLandmarkerHelper = HandLandmarkerHelper(
+                context = context,
+                runningMode = RunningMode.LIVE_STREAM,
+                minHandDetectionConfidence = viewModel.currentMinHandDetectionConfidence,
+                minHandTrackingConfidence = viewModel.currentMinHandTrackingConfidence,
+                minHandPresenceConfidence = viewModel.currentMinHandPresenceConfidence,
+                maxNumHands = viewModel.currentMaxHands,
+                currentDelegate = viewModel.currentDelegate
+            )
+        }
     }
 
 
@@ -72,13 +78,14 @@ class Camera (private var context : Context, private var viewModel: CameraViewMo
 
         // Preview. Only using the 4:3 ratio because this is the closest to our models
         preview = Preview.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
-            .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
             .build()
+            .also {
+                it.setSurfaceProvider(surfaceProvider)
+            }
 
         // ImageAnalysis. Using RGBA 8888 to match how our models work
         imageAnalyzer =
             ImageAnalysis.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
-                .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
                 .build()
@@ -89,21 +96,19 @@ class Camera (private var context : Context, private var viewModel: CameraViewMo
                     }
                 }
 
-        // Must unbind the use-cases before rebinding them
-        cameraProvider.unbindAll()
-
         try {
+            // Must unbind the use-cases before rebinding them
+            cameraProvider.unbindAll()
             // A variable number of use-cases can be passed here -
             // camera provides access to CameraControl & CameraInfo
-            camera = cameraProvider.bindToLifecycle(
-                this, cameraSelector, preview, imageAnalyzer
-            )
+            camera = cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
+
 
             // Attach the viewfinder's surface provider to preview use case
-            preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
         } catch (exc: Exception) {
-//            Log.e(TAG, "Use case binding failed", exc)
+            Log.e("cameraError", "Use case binding failed", exc)
         }
+
     }
 
     private fun detectHand(imageProxy: ImageProxy) {

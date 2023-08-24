@@ -86,7 +86,6 @@ private fun CameraContent(
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val cameraController = remember { LifecycleCameraController(context) }
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { paddingValues: PaddingValues ->
@@ -101,8 +100,7 @@ private fun CameraContent(
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                     scaleType = PreviewView.ScaleType.FILL_START
                 }.also { previewView ->
-                    previewView.controller = cameraController
-                    cameraController.bindToLifecycle(lifecycleOwner)
+                    var camera = CameraControll(context, viewModel, lifecycleOwner, previewView.surfaceProvider)
                 }
             }
         )

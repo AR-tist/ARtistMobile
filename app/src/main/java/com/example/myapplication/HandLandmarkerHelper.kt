@@ -111,7 +111,6 @@ class HandLandmarkerHelper(
 
             // The ResultListener and ErrorListener only use for LIVE_STREAM mode.
             if (runningMode == RunningMode.LIVE_STREAM) {
-                Log.d("민규", "1")
                 optionsBuilder
                     .setResultListener(this::returnLivestreamResult)
                     .setErrorListener(this::returnLivestreamError)
@@ -193,6 +192,10 @@ class HandLandmarkerHelper(
     // Run hand hand landmark using MediaPipe Hand Landmarker API
     @VisibleForTesting
     fun detectAsync(mpImage: MPImage, frameTime: Long) {
+//        Log.d("민규","3")
+//        Log.d("민규", mpImage.height.toString())
+//        Log.d("민규", mpImage.width.toString())
+//        Log.d("민규", mpImage.toString())
         handLandmarker?.detectAsync(mpImage, frameTime)
         // As we're using running mode LIVE_STREAM, the landmark result will
         // be returned in returnLivestreamResult function
