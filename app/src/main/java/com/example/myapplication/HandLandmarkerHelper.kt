@@ -40,6 +40,7 @@ class HandLandmarkerHelper(
     var currentDelegate: Int = DELEGATE_CPU,
     var runningMode: RunningMode = RunningMode.IMAGE,
     val context: Context,
+    val handLandmarkerHelperListener: LandmarkerListener? = null
     // this listener is only used when running in RunningMode.LIVE_STREAM
 ) {
 
@@ -84,13 +85,13 @@ class HandLandmarkerHelper(
 
         // Check if runningMode is consistent with handLandmarkerHelperListener
         when (runningMode) {
-//            RunningMode.LIVE_STREAM -> {
-//                if (handLandmarkerHelperListener == null) {
-//                    throw IllegalStateException(
-//                        "handLandmarkerHelperListener must be set when runningMode is LIVE_STREAM."
-//                    )
-//                }
-//            }
+            RunningMode.LIVE_STREAM -> {
+                if (handLandmarkerHelperListener == null) {
+                    throw IllegalStateException(
+                        "handLandmarkerHelperListener must be set when runningMode is LIVE_STREAM."
+                    )
+                }
+            }
             else -> {
                 // no-op
             }
@@ -120,20 +121,20 @@ class HandLandmarkerHelper(
             handLandmarker =
                 HandLandmarker.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
-//            handLandmarkerHelperListener?.onError(
-//                "Hand Landmarker failed to initialize. See error logs for " +
-//                        "details"
-//            )
+            handLandmarkerHelperListener?.onError(
+                "Hand Landmarker failed to initialize. See error logs for " +
+                        "details" + e.message
+            )
             Log.e(
                 TAG, "MediaPipe failed to load the task with error: " + e
                     .message
             )
         } catch (e: RuntimeException) {
             // This occurs if the model being used does not support GPU
-//            handLandmarkerHelperListener?.onError(
-//                "Hand Landmarker failed to initialize. See error logs for " +
-//                        "details", GPU_ERROR
-//            )
+            handLandmarkerHelperListener?.onError(
+                "Hand Landmarker failed to initialize. See error logs for " +
+                        "details" + e.message, GPU_ERROR
+            )
             Log.e(
                 TAG,
                 "Image classifier failed to load model with error: " + e.message
@@ -266,18 +267,18 @@ class HandLandmarkerHelper(
                             resultList.add(detectionResult)
                         } ?: {
                         didErrorOccurred = true
-//                        handLandmarkerHelperListener?.onError(
-//                            "ResultBundle could not be returned" +
-//                                    " in detectVideoFile"
-//                        )
+                        handLandmarkerHelperListener?.onError(
+                            "ResultBundle could not be returned" +
+                                    " in detectVideoFile"
+                        )
                     }
                 }
                 ?: run {
                     didErrorOccurred = true
-//                    handLandmarkerHelperListener?.onError(
-//                        "Frame at specified time could not be" +
-//                                " retrieved when detecting in video."
-//                    )
+                    handLandmarkerHelperListener?.onError(
+                        "Frame at specified time could not be" +
+                                " retrieved when detecting in video."
+                    )
                 }
         }
 
@@ -324,9 +325,9 @@ class HandLandmarkerHelper(
 
         // If handLandmarker?.detect() returns null, this is likely an error. Returning null
         // to indicate this.
-//        handLandmarkerHelperListener?.onError(
-//            "Hand Landmarker failed to detect."
-//        )
+        handLandmarkerHelperListener?.onError(
+            "Hand Landmarker failed to detect."
+        )
         return null
     }
 
@@ -335,7 +336,7 @@ class HandLandmarkerHelper(
         result: HandLandmarkerResult,
         input: MPImage
     ) {
-        Log.d("민규", "2")
+//        Log.d("민규", "2")
         val finishTimeMs = SystemClock.uptimeMillis()
         val inferenceTime = finishTimeMs - result.timestampMs()
 
@@ -352,7 +353,7 @@ class HandLandmarkerHelper(
     private fun onResults(
         resultBundle: HandLandmarkerHelper.ResultBundle
     ) {
-        Log.d("민규",resultBundle.results.first().toString())
+//        Log.d("민규",resultBundle.results.first().toString())
 //        activity?.runOnUiThread {
 //            if (_fragmentCameraBinding != null) {
 //                fragmentCameraBinding.bottomSheetLayout.inferenceTimeVal.text =
@@ -374,10 +375,10 @@ class HandLandmarkerHelper(
     // Return errors thrown during detection to this HandLandmarkerHelper's
     // caller
     private fun returnLivestreamError(error: RuntimeException) {
-        Log.d("민규", error.toString())
-//        handLandmarkerHelperListener?.onError(
-//            error.message ?: "An unknown error has occurred"
-//        )
+//        Log.d("민규", error.toString())
+        handLandmarkerHelperListener?.onError(
+            error.message ?: "An unknown error has occurred"
+        )
     }
 
     companion object {

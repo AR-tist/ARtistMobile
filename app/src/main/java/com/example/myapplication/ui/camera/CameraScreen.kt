@@ -86,6 +86,7 @@ private fun CameraContent(
 
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { paddingValues: PaddingValues ->

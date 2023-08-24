@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class CameraControll (private var context : Context, private var viewModel: CameraViewModel, private var lifecycleOwner: LifecycleOwner, private var surfaceProvider: Preview.SurfaceProvider){
+class CameraControll (private var context : Context, private var viewModel: CameraViewModel, private var lifecycleOwner: LifecycleOwner, private var surfaceProvider: Preview.SurfaceProvider) : HandLandmarkerHelper.LandmarkerListener{
     lateinit var handLandmarkerHelper: HandLandmarkerHelper
 
 
@@ -27,11 +27,10 @@ class CameraControll (private var context : Context, private var viewModel: Came
     private var preview: Preview? = null
     private var camera : Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
-    private var cameraFacing = CameraSelector.LENS_FACING_FRONT
+    private var cameraFacing = CameraSelector.LENS_FACING_BACK
 
     private lateinit var backgroundExecutor: ExecutorService
 
-//    private lateinit var backgroundExecutor: ExecutorService
     init{
         backgroundExecutor = Executors.newSingleThreadExecutor()
         setUpCamera()
@@ -44,7 +43,8 @@ class CameraControll (private var context : Context, private var viewModel: Came
                 minHandTrackingConfidence = viewModel.currentMinHandTrackingConfidence,
                 minHandPresenceConfidence = viewModel.currentMinHandPresenceConfidence,
                 maxNumHands = viewModel.currentMaxHands,
-                currentDelegate = viewModel.currentDelegate
+                currentDelegate = viewModel.currentDelegate,
+                handLandmarkerHelperListener = this
             )
         }
     }
@@ -116,5 +116,13 @@ class CameraControll (private var context : Context, private var viewModel: Came
             imageProxy = imageProxy,
             isFrontCamera = cameraFacing == CameraSelector.LENS_FACING_FRONT
         )
+    }
+
+    override fun onError(error: String, errorCode: Int) {
+        Log.d("민규", "$errorCode $error")
+    }
+
+    override fun onResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
+//        Log.d("민규",resultBundle.results.first().toString())
     }
 }
