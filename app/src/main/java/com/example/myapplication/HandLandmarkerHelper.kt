@@ -74,9 +74,15 @@ class HandLandmarkerHelper(
         // Use the specified hardware for running the model. Default to CPU
         when (currentDelegate) {
             DELEGATE_CPU -> {
+                Log.e(
+                    "민규", "CPU"
+                )
                 baseOptionBuilder.setDelegate(Delegate.CPU)
             }
             DELEGATE_GPU -> {
+                Log.e(
+                    "민규", "GPU"
+                )
                 baseOptionBuilder.setDelegate(Delegate.GPU)
             }
         }
@@ -109,15 +115,14 @@ class HandLandmarkerHelper(
                     .setMinHandPresenceConfidence(minHandPresenceConfidence)
                     .setNumHands(maxNumHands)
                     .setRunningMode(runningMode)
-
             // The ResultListener and ErrorListener only use for LIVE_STREAM mode.
             if (runningMode == RunningMode.LIVE_STREAM) {
                 optionsBuilder
                     .setResultListener(this::returnLivestreamResult)
                     .setErrorListener(this::returnLivestreamError)
             }
-
             val options = optionsBuilder.build()
+            Log.e("민규", options.toString())
             handLandmarker =
                 HandLandmarker.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
@@ -353,24 +358,7 @@ class HandLandmarkerHelper(
     private fun onResults(
         resultBundle: HandLandmarkerHelper.ResultBundle
     ) {
-//        Log.d("민규",resultBundle.results.first().toString())
-//        activity?.runOnUiThread {
-//            if (_fragmentCameraBinding != null) {
-//                fragmentCameraBinding.bottomSheetLayout.inferenceTimeVal.text =
-//                    String.format("%d ms", resultBundle.inferenceTime)
-//
-//                // Pass necessary information to OverlayView for drawing on the canvas
-//                fragmentCameraBinding.overlay.setResults(
-//                    resultBundle.results.first(),
-//                    resultBundle.inputImageHeight,
-//                    resultBundle.inputImageWidth,
-//                    RunningMode.LIVE_STREAM
-//                )
-//
-//                // Force a redraw
-//                fragmentCameraBinding.overlay.invalidate()
-//            }
-//        }
+        Log.d("민규",resultBundle.results.first().toString())
     }
     // Return errors thrown during detection to this HandLandmarkerHelper's
     // caller

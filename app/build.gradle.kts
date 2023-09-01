@@ -1,6 +1,9 @@
+import de.undercouch.gradle.tasks.download.Download
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("de.undercouch.download")
 }
 
 android {
@@ -45,6 +48,20 @@ android {
         }
     }
 }
+
+project.extra["ASSET_DIR"] = project.projectDir.toString() + "/src/main/assets"
+
+val downloadModel = tasks.register<Download>("downloadModel"){
+    src("https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task")
+    dest(file(project.extra["ASSET_DIR"].toString() + "/hand_landmarker.task"))
+    overwrite(false)
+}
+
+tasks.named("preBuild"){
+    dependsOn(downloadModel)
+}
+
+
 
 dependencies {
 
