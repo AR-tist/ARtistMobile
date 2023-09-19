@@ -14,8 +14,12 @@ import com.example.myapplication.ui.MainScreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
+    private lateinit var serverManager: WebSocketServerManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
         setContent {
             MyApplicationTheme {
                 // A surface container using the 'background' color from the theme
@@ -24,6 +28,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        serverManager.stopServer()
     }
 }
 

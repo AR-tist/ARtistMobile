@@ -48,7 +48,10 @@ class HandLandmarkerHelper(
     // If the Hand Landmarker will not change, a lazy val would be preferable.
     private var handLandmarker: HandLandmarker? = null
 
+    // 웹 소켓 서버를 생성하고 시작합니다.
+    val serverManager = WebSocketServerManager("0.0.0.0", 4439)
     init {
+        serverManager.startServer()
         setupHandLandmarker()
     }
 
@@ -358,7 +361,8 @@ class HandLandmarkerHelper(
     private fun onResults(
         resultBundle: HandLandmarkerHelper.ResultBundle
     ) {
-        Log.d("민규",resultBundle.results.first().toString())
+//        Log.d("민규",resultBundle.results.first().toString())
+        serverManager.broadcast(resultBundle.results.first().toString())
     }
     // Return errors thrown during detection to this HandLandmarkerHelper's
     // caller
