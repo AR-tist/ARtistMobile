@@ -78,6 +78,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     // MediaPipe Library
     implementation("com.google.mediapipe:tasks-vision:0.10.0")
+    implementation("com.google.zxing:core:3.5.2")
 
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version")
