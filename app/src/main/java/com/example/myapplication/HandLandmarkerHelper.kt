@@ -358,7 +358,13 @@ class HandLandmarkerHelper(
     private fun onResults(
         resultBundle: HandLandmarkerHelper.ResultBundle
     ) {
-        Log.d("민규",resultBundle.results.first().toString())
+        val results = resultBundle.results.first().toString()
+        val landmarksList = resultBundle.results.first().landmarks()
+        val landmarkPoint = landmarksList.getOrNull(0)
+        val fourthLandmark = landmarkPoint?.get(4).toString()
+
+        val handLR = resultBundle.results.first().handednesses().getOrNull(0)
+        Log.d("민규", handLR.toString()) //왼손 오른손이 반대로 되어있음
     }
     // Return errors thrown during detection to this HandLandmarkerHelper's
     // caller
