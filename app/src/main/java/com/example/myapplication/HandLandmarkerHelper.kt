@@ -26,7 +26,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.camera.core.ImageProxy
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.framework.image.MPImage
-import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
+import com.google.mediapipe.tasks.components.containers.Landmark
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
@@ -42,12 +42,14 @@ class HandLandmarkerHelper(
     var runningMode: RunningMode = RunningMode.IMAGE,
     val context: Context,
     val handLandmarkerHelperListener: LandmarkerListener? = null
+
     // this listener is only used when running in RunningMode.LIVE_STREAM
 ) {
 
     // For this example this needs to be a var so it can be reset on changes.
     // If the Hand Landmarker will not change, a lazy val would be preferable.
     private var handLandmarker: HandLandmarker? = null
+    private var isCalibrate : Boolean = false
 
     init {
         setupHandLandmarker()
@@ -357,7 +359,7 @@ class HandLandmarkerHelper(
     }
 
     private fun onResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
-        val landmarksList = resultBundle.results.first().landmarks()
+        val landmarksList = resultBundle.results.first().worldLandmarks()
         val handednessList = resultBundle.results.first().handednesses()
 
         val handedness1 = handednessList.getOrNull(0)?.toString()
@@ -386,58 +388,57 @@ class HandLandmarkerHelper(
         }
 
         val firstHandLandmarks = landmarksList.getOrNull(0)
-        if (firstHandLandmarks != null) {
-            Log.d("민규", "$handType1 Landmarks: $firstHandLandmarks")
-        }
+//        if (firstHandLandmarks != null) {
+//            Log.d("민규", "$handType1 Landmarks: $firstHandLandmarks")
+//        }
 
         val secondHandLandmarks = landmarksList.getOrNull(1)
-        if (secondHandLandmarks != null) {
-            Log.d("민규", "$handType2 Landmarks: $secondHandLandmarks")
-        }
+//        if (secondHandLandmarks != null) {
+//            Log.d("민규", "$handType2 Landmarks: $secondHandLandmarks")
+//        }
 
-        Log.d("민규", "Detected Hands: $handType1 + $handType2")
+//        Log.d("민규", "Detected Hands: $handType1 + $handType2")
 
-        if(handType1 == "Left hand"){
-            LeftCalibration(firstHandLandmarks)
-            RightCalibration(secondHandLandmarks)
+        if(!isCalibrate){
+            if(handType1 == "Left hand"){
+                LeftCalibration(firstHandLandmarks)
+                RightCalibration(secondHandLandmarks)
+            }else{
+                RightCalibration(firstHandLandmarks)
+                LeftCalibration(secondHandLandmarks)
+            }
         }else{
-            RightCalibration(firstHandLandmarks)
-            LeftCalibration(secondHandLandmarks)
+            //캘리가 끝나 사이트에 값을 보내는 로직
         }
+
+
     }
 
-    private fun calibrate(handLandmarks: List<NormalizedLandmark>?): List<Float>? {
+    private fun calibrate(handLandmarks: MutableList<Landmark>?): List<Float>? {
         if (handLandmarks == null) {
             return null
         }
 
-        val numLandmarks = handLandmarks.size
-        val numFrames = 90 // Assuming 30 frames per second for 3 seconds
+        val numLandmarks = 20
 
-        val averageLandmarks = MutableList(numLandmarks) { FloatArray(3) }
-
-        // Initialize averageLandmarks with zeros
-        for (i in 0 until numLandmarks) {
-            for (j in 0 until 3) {
-                averageLandmarks[i][j] = 0f
-            }
-        }
-
-        // Accumulate landmark positions over the frames
-//        for (frameLandmarks in handLandmarks) {
-//            for (i in 0 until numLandmarks) {
-//                averageLandmarks[i][0] += frameLandmarks[i].x
-//                averageLandmarks[i][1] += frameLandmarks[i].y
-//                averageLandmarks[i][2] += frameLandmarks[i].z
+//        val averageLandmarks = MutableList(numLandmarks) { FloatArray(3) }
+//
+//        // Initialize averageLandmarks with zeros
+//        for (i in 0 until numLandmarks) {
+//            for (j in 0 until 3) {
+//                averageLandmarks[i][j] = 0f
 //            }
 //        }
-
-        // Calculate the average by dividing by the number of frames
-        for (i in 0 until numLandmarks) {
-            for (j in 0 until 3) {
-                averageLandmarks[i][j] /= numFrames.toFloat()
-            }
-        }
+//
+//        // Accumulate landmark positions over the frames
+//
+//
+//        // Calculate the average by dividing by the number of frames
+//        for (i in 0 until numLandmarks) {
+//            for (j in 0 until 3) {
+//                averageLandmarks[i][j] /= numFrames.toFloat()
+//            }
+//        }
 
         // Flatten the 2D array to a 1D list
 //        val flattenedList = averageLandmarks.flatten()
@@ -447,26 +448,78 @@ class HandLandmarkerHelper(
     }
 
     // Example usage in calibration functions
-    private fun RightCalibration(firstHandLandmarks: List<NormalizedLandmark>?) {
-        val calibratedValues = calibrate(firstHandLandmarks)
+//    private fun RightCalibration(firstHandLandmarks: MutableList<Landmark>?) {
+//        val calibratedValues = calibrate(firstHandLandmarks)
+//        val fourthLandmark = firstHandLandmarks?.get(4)
+//
+//        // Regular expression to extract x, y, z values
+//        val regex = Regex("""x=([-0-9.]+) y=([-0-9.]+) z=([-0-9.]+)""")
+//
+//        // Find all matches in the string
+//        val matchResults = regex.findAll(fourthLandmark.toString())
+//
+//        // Iterate over the sequence and print each match result
+//        matchResults.forEachIndexed { index, result ->
+//            val xValue = result.groupValues[1].toDouble()
+//            val yValue = result.groupValues[2].toDouble()
+//            val zValue = result.groupValues[3].toDouble()
+//
+//            Log.d("지해", "Match $index: x=$xValue, y=$yValue, z=$zValue")
+//        }
+//    }
 
-        if (calibratedValues != null) {
-            // Use calibrated values for further processing or updating parameters
-            Log.d("민규", "Calibrated Right Hand: $calibratedValues")
-        } else {
-            Log.d("민규", "Right Hand Landmarks are null during calibration.")
+    private fun RightCalibration(firstHandLandmarks: MutableList<Landmark>?) {
+        val calibratedValues = calibrate(firstHandLandmarks)
+        val fourthLandmark = firstHandLandmarks?.get(4)
+
+        // Regular expression to extract x, y, z values
+        val regex = Regex("""x=([-0-9.]+) y=([-0-9.]+) z=([-0-9.]+)""")
+
+        // Find all matches in the string
+        val matchResults = regex.findAll(fourthLandmark.toString())
+
+        // Iterate over the sequence and print each match result
+//        matchResults.forEachIndexed { index, result ->
+//            val xValue = result.groupValues[1].toDouble()
+//            val yValue = result.groupValues[2].toDouble()
+//            val zValue = result.groupValues[3].toDouble()
+//
+//            Log.d("지해", "Match $index: x=$xValue, y=$yValue, z=$zValue")
+//        }
+
+        // Iterate over the sequence and check zValue
+        matchResults.forEachIndexed { index, result ->
+            val zValue = result.groupValues[3].toDouble()
+
+            if (zValue < 0.025) {
+                Log.d("지해", "$zValue, Up")
+            } else {
+                Log.d("지해", "$zValue, Down")
+            }
         }
     }
 
-    private fun LeftCalibration(secondHandLandmarks: List<NormalizedLandmark>?) {
+//
+//        Log.d("준엽", "x: $xValue, y: $yValue, z: $zValue")
+
+//        if(zValue?.toDouble() ?: 0.0  < 0.5) Log.d("민규", "0.5이하") else Log.d("민규", "0,5이상")
+//        if (calibratedValues != null) {
+//            // Use calibrated values for further processing or updating parameters
+//            Log.d("민규", "Calibrated Right Hand: $calibratedValues")
+//        } else {
+//            Log.d("민규", "Right Hand Landmarks are null during calibration.")
+//        }
+//    }
+
+    private fun LeftCalibration(secondHandLandmarks: MutableList<Landmark>?) {
         val calibratedValues = calibrate(secondHandLandmarks)
 
-        if (calibratedValues != null) {
-            // Use calibrated values for further processing or updating parameters
-            Log.d("민규", "Calibrated Left Hand: $calibratedValues")
-        } else {
-            Log.d("민규", "Left Hand Landmarks are null during calibration.")
-        }
+//        if (calibratedValues != null) {
+//            // Use calibrated values for further processing or updating parameters
+//            Log.d("민규", "Calibrated Left Hand: $calibratedValues")
+//        } else {
+//            Log.d("민규", "Left Hand Landmarks are null during calibration.")
+//        }
     }
 
     // Return errors thrown during detection to this HandLandmarkerHelper's
