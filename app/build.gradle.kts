@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.example.myapplication"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.example.myapplication"
         minSdk = 24
-        targetSdk = 33
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -94,6 +94,9 @@ dependencies {
 
     implementation("com.google.accompanist:accompanist-permissions:$accompanist_version")
     implementation("org.java-websocket:Java-WebSocket:1.5.4")
+    implementation("androidx.navigation:navigation-compose:2.7.5")
+
+
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

@@ -48,14 +48,25 @@ public class WsServer extends WebSocketServer {
         Log.d(TAG, "onClose: ");
     }
 
-    @Override
-    public void onMessage(WebSocket conn, String message) {
-        Log.d(TAG, "onMessage: " + message);
-    }
 
     @Override
     public void onMessage(WebSocket conn, ByteBuffer message) {
         Log.d(TAG, "onMessage: buffer");
+    }
+
+    private boolean readyReceived = false;
+
+    @Override
+    public void onMessage(WebSocket conn, String message) {
+        Log.d(TAG, "onMessage: " + message);
+        if ("ready".equals(message)) {
+            readyReceived = true;
+            // 추가적인 동작 수행...
+        }
+    }
+
+    public boolean isReadyReceived() {
+        return readyReceived;
     }
 
     private boolean running = false;

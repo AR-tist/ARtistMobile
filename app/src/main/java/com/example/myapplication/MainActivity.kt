@@ -12,19 +12,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.myapplication.ui.MainScreen
 import com.example.myapplication.ui.theme.MyApplicationTheme
-
+@androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 class MainActivity : ComponentActivity() {
     private lateinit var serverManager: WebSocketServerManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        serverManager = WebSocketServerManager("0.0.0.0", 4439)
+        // IP와 포트 설정
 
         setContent {
             MyApplicationTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    MainScreen()
+                    MainScreen(serverManager = serverManager)
                 }
             }
         }

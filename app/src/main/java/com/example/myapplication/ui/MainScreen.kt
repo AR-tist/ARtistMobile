@@ -41,36 +41,77 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.camera.view.PreviewView
 import androidx.camera.core.Preview
+import androidx.navigation.NavController
 
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.WebSocketServerManager
+import kotlinx.coroutines.delay
+
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.composable
+
+import java.net.NetworkInterface
+import java.util.*
+
+fun getLocalIpAddress(): String {
+    try {
+        val interfaces = NetworkInterface.getNetworkInterfaces()
+        while (interfaces.hasMoreElements()) {
+            val iface = interfaces.nextElement()
+            val addresses = iface.inetAddresses
+            while (addresses.hasMoreElements()) {
+                val addr = addresses.nextElement()
+                if (!addr.isLoopbackAddress && addr.hostAddress.indexOf(':') < 0) {
+                    return addr.hostAddress
+                }
+            }
+        }
+    } catch (ex: Exception) {
+        ex.printStackTrace()
+    }
+    return "Unable to get IP Address"
+}
+
+enum class ServerStatus {
+    Stopped, Starting, Running
+}
 
 
 @Composable
 @ExperimentalGetImage
-private fun MainContent() {
+private fun MainContent(webSocketServerManager: WebSocketServerManager) {
     var qrCodeValue by remember { mutableStateOf("") }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val previewView = remember { PreviewView(context) }
+//    val previewView = remember { PreviewView(context) }
 
+    val serverStatus = remember { mutableStateOf(ServerStatus.Stopped) }
+    val serverManager = remember { WebSocketServerManager("0.0.0.0", 4439) } // 예시 IP 및 포트
+
+    val localIpAddress = getLocalIpAddress()
     Column(modifier = Modifier.padding(16.dp)) {
-        AndroidView(factory = { previewView })
+        Text("나의 로컬 네트워크 아이피: 172.16.234.1", fontSize = 18.sp)
+
         Button(onClick = {
-            startQrCodeScanner(context, lifecycleOwner, previewView) { qrCode ->
-                qrCodeValue = qrCode
+            serverStatus.value = ServerStatus.Starting
+            try {
+                serverManager.startServer()
+                serverStatus.value = ServerStatus.Running
+            } catch (e: Exception) {
+                e.printStackTrace()
+                serverStatus.value = ServerStatus.Stopped
             }
         }) {
-            Text("QR 코드 스캐너 시작", fontSize = 18.sp)
+            Text("웹소켓 서버 시작")
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = { /* 손 인식 기능 실행 로직 */ }) {
-            Text("손 인식 기능 시작", fontSize = 18.sp)
+        when (serverStatus.value) {
+            ServerStatus.Starting -> Text("서버 시작 중...")
+            ServerStatus.Running -> Text("서버 실행 중...")
+            ServerStatus.Stopped -> Text("서버 중지됨")
         }
 
-        if (qrCodeValue.isNotEmpty()) {
-            Text("QR 코드 값: $qrCodeValue")
-        }
     }
 }
 @ExperimentalGetImage
@@ -114,17 +155,45 @@ fun startQrCodeScanner(context: Context, lifecycleOwner: LifecycleOwner, preview
     }, ContextCompat.getMainExecutor(context))
 }
 
+@Composable
+fun AppNavigation() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "profile") {
+        composable("connected") { ConnectedScreen(/*...*/) }
+    }
+}
+
+@Composable
+fun ConnectedScreen() {
+    Text("연결이 확인 됐습니다")
+}
+
+
 @ExperimentalGetImage
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(serverManager: WebSocketServerManager) {
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
+    val navController = rememberNavController()
+
     LaunchedEffect(key1 = true) {
         cameraPermissionState.launchPermissionRequest()
     }
+
+    LaunchedEffect(key1 = Unit) {
+        while (true) {
+            if (serverManager.isReadyReceived()) {
+                navController.navigate("newScreen")
+                break
+            }
+            delay(1000) // 1초마다 확인
+        }
+    }
+
+
     when {
         cameraPermissionState.status.isGranted -> {
-            MainContent()
+            MainContent(serverManager)
         }
         cameraPermissionState.status.shouldShowRationale -> {
             Text("이 앱은 카메라 접근 권한이 필요합니다.")

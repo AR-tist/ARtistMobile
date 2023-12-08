@@ -1,6 +1,5 @@
 package com.example.myapplication
 
-import java.net.InetSocketAddress
 import kotlinx.coroutines.*
 
 class WebSocketServerManager(private val ipAddress: String, private val port: Int) {
@@ -22,4 +21,9 @@ class WebSocketServerManager(private val ipAddress: String, private val port: In
         // 모든 연결된 클라이언트에게 메시지를 브로드캐스트합니다.
         server?.broadcast(message)
     }
+
+    fun isReadyReceived(): Boolean {
+        return server?.isReadyReceived ?: false
+    }
+
 }
