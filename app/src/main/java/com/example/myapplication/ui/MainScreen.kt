@@ -183,15 +183,12 @@ private fun MainContent(navController: NavController,
         }
 
     Column(modifier = Modifier.padding(16.dp)) {
-        Button(onClick = { navController.navigate("mainScreen") }) {
+        Button(onClick = { /*TODO*/ }) {
             Text("QRcode ", fontSize = 18.sp)
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = {
-            // Request camera permission
-            requestPermissionLauncher.launch(Manifest.permission.CAMERA)
-        }) {
+        Button(onClick = { navController.navigate("cameraScreen") }) {
             Text("손 인식 기능 시작", fontSize = 18.sp)
         }
     }
