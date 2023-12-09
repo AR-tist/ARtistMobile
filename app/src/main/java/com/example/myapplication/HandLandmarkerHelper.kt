@@ -365,12 +365,9 @@ class HandLandmarkerHelper(
         )
     }
 
-    private fun onResults(
-        resultBundle: HandLandmarkerHelper.ResultBundle
-    ) {
-//        Log.d("민규",resultBundle.results.first().toString())
-        serverManager.broadcast(resultBundle.results.first().toString())
     private fun onResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
+        serverManager.broadcast(resultBundle.results.first().toString())
+
         val landmarksList = resultBundle.results.first().landmarks()
         val handednessList = resultBundle.results.first().handednesses()
 
