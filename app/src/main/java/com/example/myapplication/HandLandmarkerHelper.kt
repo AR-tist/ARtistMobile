@@ -54,7 +54,6 @@ class HandLandmarkerHelper(
     // For this example this needs to be a var so it can be reset on changes.
     // If the Hand Landmarker will not change, a lazy val would be preferable.
     private var handLandmarker: HandLandmarker? = null
-    private var isCalibrate : Boolean = false
 
     private var positionChange : PositionChange = PositionChange()
 
@@ -406,53 +405,16 @@ class HandLandmarkerHelper(
 
 //        Log.d("민규", "Detected Hands: $handType1 + $handType2")
 
-        if(!isCalibrate){
-            if(handType1 == "Left hand"){
-                LeftCalibration(firstHandLandmarks)
-                RightCalibration(secondHandLandmarks)
-            }else{
-                RightCalibration(firstHandLandmarks)
-                LeftCalibration(secondHandLandmarks)
-            }
+        if(handType1 == "Left hand"){
+            LeftCalibration(firstHandLandmarks)
+            RightCalibration(secondHandLandmarks)
         }else{
-            //캘리가 끝나 사이트에 값을 보내는 로직
+            RightCalibration(firstHandLandmarks)
+            LeftCalibration(secondHandLandmarks)
         }
 
 
     }
-
-//    private fun calibrate(handLandmarks: MutableList<NormalizedLandmark>?): List<Float>? {
-//        if (handLandmarks == null) {
-//            return null
-//        }
-//
-//        val numLandmarks = 20
-//
-////        val averageLandmarks = MutableList(numLandmarks) { FloatArray(3) }
-////
-////        // Initialize averageLandmarks with zeros
-////        for (i in 0 until numLandmarks) {
-////            for (j in 0 until 3) {
-////                averageLandmarks[i][j] = 0f
-////            }
-////        }
-////
-////        // Accumulate landmark positions over the frames
-////
-////
-////        // Calculate the average by dividing by the number of frames
-////        for (i in 0 until numLandmarks) {
-////            for (j in 0 until 3) {
-////                averageLandmarks[i][j] /= numFrames.toFloat()
-////            }
-////        }
-//
-//        // Flatten the 2D array to a 1D list
-////        val flattenedList = averageLandmarks.flatten()
-//
-////        return flattenedList
-//        return nullc
-//    } 
 
 
     data class Point(val x: Float, val y: Float)
@@ -466,6 +428,8 @@ class HandLandmarkerHelper(
         return sqrt(sum)
     }
 
+    
+
     private fun RightCalibration(firstHandLandmarks: MutableList<NormalizedLandmark>?) {
 //    val calibratedValues = calibrate(firstHandLandmarks)
 
@@ -475,74 +439,35 @@ class HandLandmarkerHelper(
             return
         }
 
-        fun calculateVector(p1: Point, p2: Point): Point {
-            return Point(p2.x - p1.x, p2.y - p1.y)
-        }
-
-        fun calculateDotProduct(v1: Point, v2: Point): Float {
-            return v1.x * v2.x + v1.y * v2.y
-        }
-
-        fun calculateMagnitude(v: Point): Float {
-            return sqrt(v.x * v.x + v.y * v.y)
-        }
-
-        fun calculateAngleBetweenVectors(v1: Point, v2: Point): Double {
-            val dotProduct = calculateDotProduct(v1, v2)
-            val magnitudeV1 = calculateMagnitude(v1)
-            val magnitudeV2 = calculateMagnitude(v2)
-
-            val cosTheta = dotProduct / (magnitudeV1 * magnitudeV2)
-
-    //        // Ensure that the value passed to acos is within the valid range [-1, 1]
-            val safeCosTheta = if (cosTheta < -1.0) -1.0 else if (cosTheta > 1.0) 1.0 else cosTheta
-    //
-    //        // Calculate the angle in radians
-            val angleRad = acos(safeCosTheta.toDouble())
-    //
-    //        // Convert radians to degrees
-            val angleDegrees = Math.toDegrees(angleRad)
-
-            return angleDegrees
-        }
-
-        var distance0 = euclideanDistance(Point(firstHandLandmarks[3].x(), firstHandLandmarks[3].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
+//        var distance0 = euclideanDistance(Point(firstHandLandmarks[3].x(), firstHandLandmarks[3].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
         var distance1 = euclideanDistance(Point(firstHandLandmarks[8].x(), firstHandLandmarks[8].y()), Point(firstHandLandmarks[7].x(), firstHandLandmarks[7].y())) * 100
         var distance2 = euclideanDistance(Point(firstHandLandmarks[12].x(), firstHandLandmarks[12].y()), Point(firstHandLandmarks[11].x(), firstHandLandmarks[11].y())) * 100
         var distance3 = euclideanDistance(Point(firstHandLandmarks[16].x(), firstHandLandmarks[16].y()), Point(firstHandLandmarks[15].x(), firstHandLandmarks[15].y())) * 100
         var distance4 = euclideanDistance(Point(firstHandLandmarks[20].x(), firstHandLandmarks[20].y()), Point(firstHandLandmarks[19].x(), firstHandLandmarks[19].y())) * 100
 
-    //    val point4 = Point(firstHandLandmarks[4].x(), firstHandLandmarks[4].y())
-    //    val point3 = Point(firstHandLandmarks[3].x(), firstHandLandmarks[3].y())
-    //    val point2 = Point(firstHandLandmarks[2].x(), firstHandLandmarks[2].y())
-    //
-    //    val vector1 = calculateVector(point3, point4)
-    //    val vector2 = calculateVector(point3, point2)
-    //
-    //    val angle = calculateAngleBetweenVectors(vector1, vector2)
-        // Log.d("준엽", "0번째 손가락이 굽은 각도는 $angle 입니다.")
+        var A = firstHandLandmarks[4].y()
+        var B = firstHandLandmarks[3].y()
+        var distance11 = A - B
+        Log.d("지해", "$A $B")
 
-        // Log.d("준엽", "0번째 손가락의 길이는 ${firstHandLandmarks[4].z()}입니다.")
-
-        // if(distance0 < 7.0)
-        // {
-        //     // Log.d("준엽", "0번째 손가락이 굽었습니다. $distance0" )
-        // }
+        if(A < B){
+            Log.d("준엽", "오른손 0번째 손가락이 굽었습니다. $distance11" )
+        }
          if(distance1 < 3.0)
          {
-             Log.d("준엽", "1번째 손가락이 굽었습니다. $distance1" )
+             Log.d("준엽", "오른손 1번째 손가락이 굽었습니다. $distance1" )
          }
          if(distance2 < 3.0)
          {
-             Log.d("준엽", "2번째 손가락이 굽었습니다. $distance2" )
+             Log.d("준엽", "오른손 2번째 손가락이 굽었습니다. $distance2" )
          }
          if(distance3 < 3.25)
          {
-             Log.d("준엽", "3번째 손가락이 굽었습니다. $distance3" )
+             Log.d("준엽", "오른손 3번째 손가락이 굽었습니다. $distance3" )
          }
          if(distance4 < 3.0)
          {
-             Log.d("준엽", "4번째 손가락이 굽었습니다. $distance4" )
+             Log.d("준엽", "오른손 4번째 손가락이 굽었습니다. $distance4" )
          }
     }
 
@@ -550,14 +475,43 @@ class HandLandmarkerHelper(
 
 
     private fun LeftCalibration(secondHandLandmarks: MutableList<NormalizedLandmark>?) {
-//        val calibratedValues = calibrate(secondHandLandmarks)
+        
+        if (secondHandLandmarks == null || secondHandLandmarks.size < 21) {
+                Log.d("준엽", "Invalid number of landmarks")
+                return
+            }
 
-//        if (calibratedValues != null) {
-//            // Use calibrated values for further processing or updating parameters
-//            Log.d("민규", "Calibrated Left Hand: $calibratedValues")
-//        } else {
-//            Log.d("민규", "Left Hand Landmarks are null during calibration.")
-//        }
+//            var distance0 = euclideanDistance(Point(secondHandLandmarks[3].x(), secondHandLandmarks[3].y()), Point(secondHandLandmarks[5].x(), secondHandLandmarks[5].y())) * 100
+            var distance1 = euclideanDistance(Point(secondHandLandmarks[8].x(), secondHandLandmarks[8].y()), Point(secondHandLandmarks[7].x(), secondHandLandmarks[7].y())) * 100
+            var distance2 = euclideanDistance(Point(secondHandLandmarks[12].x(), secondHandLandmarks[12].y()), Point(secondHandLandmarks[11].x(), secondHandLandmarks[11].y())) * 100
+            var distance3 = euclideanDistance(Point(secondHandLandmarks[16].x(), secondHandLandmarks[16].y()), Point(secondHandLandmarks[15].x(), secondHandLandmarks[15].y())) * 100
+            var distance4 = euclideanDistance(Point(secondHandLandmarks[20].x(), secondHandLandmarks[20].y()), Point(secondHandLandmarks[19].x(), secondHandLandmarks[19].y())) * 100
+
+            var A = secondHandLandmarks[4].y()
+            var B = secondHandLandmarks[3].y()
+            var distance11 = A - B
+            Log.d("지해", "$A $B")
+
+            if(A < B){
+                Log.d("준엽", "왼손 0번째 손가락이 굽었습니다. $distance11" )
+            }
+             if(distance1 < 3.0)
+             {
+                 Log.d("준엽", "왼손 1번째 손가락이 굽었습니다. $distance1" )
+             }
+             if(distance2 < 3.0)
+             {
+                 Log.d("준엽", "왼손 2번째 손가락이 굽었습니다. $distance2" )
+             }
+             if(distance3 < 3.25)
+             {
+                 Log.d("준엽", "왼손 3번째 손가락이 굽었습니다. $distance3" )
+             }
+             if(distance4 < 3.0)
+             {
+                 Log.d("준엽", "왼손 4번째 손가락이 굽었습니다. $distance4" )
+             }
+
     }
 
     // Return errors thrown during detection to this HandLandmarkerHelper's
