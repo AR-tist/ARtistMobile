@@ -24,13 +24,19 @@ import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.camera.core.ImageProxy
+import com.example.myapplication.position.PositionChange
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.framework.image.MPImage
+import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
+import kotlin.math.acos
+
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 class HandLandmarkerHelper(
     var minHandDetectionConfidence: Float = DEFAULT_HAND_DETECTION_CONFIDENCE,
@@ -41,6 +47,7 @@ class HandLandmarkerHelper(
     var runningMode: RunningMode = RunningMode.IMAGE,
     val context: Context,
     val handLandmarkerHelperListener: LandmarkerListener? = null
+
     // this listener is only used when running in RunningMode.LIVE_STREAM
 ) {
 
@@ -341,7 +348,7 @@ class HandLandmarkerHelper(
 
     // Return the landmark result to this HandLandmarkerHelper's caller
     private fun returnLivestreamResult(
-        result: HandLandmarkerResult,
+            result: HandLandmarkerResult,
         input: MPImage
     ) {
 //        Log.d("민규", "2")
@@ -363,7 +370,156 @@ class HandLandmarkerHelper(
     ) {
 //        Log.d("민규",resultBundle.results.first().toString())
         serverManager.broadcast(resultBundle.results.first().toString())
+    private fun onResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
+        val landmarksList = resultBundle.results.first().landmarks()
+        val handednessList = resultBundle.results.first().handednesses()
+
+        val handedness1 = handednessList.getOrNull(0)?.toString()
+        val rightRegex = Regex("Right")
+
+        val handType1 = if (handedness1 != null) {
+            if (rightRegex.find(handedness1)?.value == "Right") {
+                "Left hand"
+            } else {
+                "Right hand"
+            }
+        } else {
+            null
+        }
+
+        val handedness2 = handednessList.getOrNull(1)?.toString()
+
+        val handType2 = if (handedness2 != null) {
+            if (rightRegex.find(handedness2)?.value == "Right") {
+                "Left hand"
+            } else {
+                "Right hand"
+            }
+        } else {
+            null
+        }
+
+        val firstHandLandmarks = landmarksList.getOrNull(0)
+//        if (firstHandLandmarks != null) {
+//            Log.d("민규", "$handType1 Landmarks: $firstHandLandmarks")
+//        }
+
+        val secondHandLandmarks = landmarksList.getOrNull(1)
+//        if (secondHandLandmarks != null) {
+//            Log.d("민규", "$handType2 Landmarks: $secondHandLandmarks")
+//        }
+
+//        Log.d("민규", "Detected Hands: $handType1 + $handType2")
+
+        if(handType1 == "Left hand"){
+            LeftCalibration(firstHandLandmarks)
+            RightCalibration(secondHandLandmarks)
+        }else{
+            RightCalibration(firstHandLandmarks)
+            LeftCalibration(secondHandLandmarks)
+        }
+
+
     }
+
+
+    data class Point(val x: Float, val y: Float)
+
+    fun euclideanDistance(point1: Point, point2: Point): Double {
+        var sum = 0.0
+
+        sum += (point1.x - point2.x).pow(2)
+        sum += (point1.y - point2.y).pow(2)
+
+        return sqrt(sum)
+    }
+
+    
+
+    private fun RightCalibration(firstHandLandmarks: MutableList<NormalizedLandmark>?) {
+//    val calibratedValues = calibrate(firstHandLandmarks)
+
+        // Ensure firstHandLandmarks is not null and contains at least 21 landmarks
+        if (firstHandLandmarks == null || firstHandLandmarks.size < 21) {
+            Log.d("준엽", "Invalid number of landmarks")
+            return
+        }
+
+//        var distance0 = euclideanDistance(Point(firstHandLandmarks[3].x(), firstHandLandmarks[3].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
+        var distance1 = euclideanDistance(Point(firstHandLandmarks[8].x(), firstHandLandmarks[8].y()), Point(firstHandLandmarks[7].x(), firstHandLandmarks[7].y())) * 100
+        var distance2 = euclideanDistance(Point(firstHandLandmarks[12].x(), firstHandLandmarks[12].y()), Point(firstHandLandmarks[11].x(), firstHandLandmarks[11].y())) * 100
+        var distance3 = euclideanDistance(Point(firstHandLandmarks[16].x(), firstHandLandmarks[16].y()), Point(firstHandLandmarks[15].x(), firstHandLandmarks[15].y())) * 100
+        var distance4 = euclideanDistance(Point(firstHandLandmarks[20].x(), firstHandLandmarks[20].y()), Point(firstHandLandmarks[19].x(), firstHandLandmarks[19].y())) * 100
+
+        var A = firstHandLandmarks[4].y()
+        var B = firstHandLandmarks[3].y()
+        var distance11 = A - B
+        Log.d("지해", "$A $B")
+
+        if(A < B){
+            Log.d("준엽", "오른손 0번째 손가락이 굽었습니다. $distance11" )
+        }
+         if(distance1 < 3.0)
+         {
+             Log.d("준엽", "오른손 1번째 손가락이 굽었습니다. $distance1" )
+         }
+         if(distance2 < 3.0)
+         {
+             Log.d("준엽", "오른손 2번째 손가락이 굽었습니다. $distance2" )
+         }
+         if(distance3 < 3.25)
+         {
+             Log.d("준엽", "오른손 3번째 손가락이 굽었습니다. $distance3" )
+         }
+         if(distance4 < 3.0)
+         {
+             Log.d("준엽", "오른손 4번째 손가락이 굽었습니다. $distance4" )
+         }
+    }
+
+
+
+
+    private fun LeftCalibration(secondHandLandmarks: MutableList<NormalizedLandmark>?) {
+        
+        if (secondHandLandmarks == null || secondHandLandmarks.size < 21) {
+                Log.d("준엽", "Invalid number of landmarks")
+                return
+            }
+
+//            var distance0 = euclideanDistance(Point(secondHandLandmarks[3].x(), secondHandLandmarks[3].y()), Point(secondHandLandmarks[5].x(), secondHandLandmarks[5].y())) * 100
+            var distance1 = euclideanDistance(Point(secondHandLandmarks[8].x(), secondHandLandmarks[8].y()), Point(secondHandLandmarks[7].x(), secondHandLandmarks[7].y())) * 100
+            var distance2 = euclideanDistance(Point(secondHandLandmarks[12].x(), secondHandLandmarks[12].y()), Point(secondHandLandmarks[11].x(), secondHandLandmarks[11].y())) * 100
+            var distance3 = euclideanDistance(Point(secondHandLandmarks[16].x(), secondHandLandmarks[16].y()), Point(secondHandLandmarks[15].x(), secondHandLandmarks[15].y())) * 100
+            var distance4 = euclideanDistance(Point(secondHandLandmarks[20].x(), secondHandLandmarks[20].y()), Point(secondHandLandmarks[19].x(), secondHandLandmarks[19].y())) * 100
+
+            var A = secondHandLandmarks[4].y()
+            var B = secondHandLandmarks[3].y()
+            var distance11 = A - B
+            Log.d("지해", "$A $B")
+
+            if(A < B){
+                Log.d("준엽", "왼손 0번째 손가락이 굽었습니다. $distance11" )
+            }
+             if(distance1 < 3.0)
+             {
+                 Log.d("준엽", "왼손 1번째 손가락이 굽었습니다. $distance1" )
+             }
+             if(distance2 < 3.0)
+             {
+                 Log.d("준엽", "왼손 2번째 손가락이 굽었습니다. $distance2" )
+             }
+             if(distance3 < 3.25)
+             {
+                 Log.d("준엽", "왼손 3번째 손가락이 굽었습니다. $distance3" )
+             }
+             if(distance4 < 3.0)
+             {
+                 Log.d("준엽", "왼손 4번째 손가락이 굽었습니다. $distance4" )
+             }
+
+    }
+
     // Return errors thrown during detection to this HandLandmarkerHelper's
     // caller
     private fun returnLivestreamError(error: RuntimeException) {
@@ -382,7 +538,7 @@ class HandLandmarkerHelper(
         const val DEFAULT_HAND_DETECTION_CONFIDENCE = 0.5F
         const val DEFAULT_HAND_TRACKING_CONFIDENCE = 0.5F
         const val DEFAULT_HAND_PRESENCE_CONFIDENCE = 0.5F
-        const val DEFAULT_NUM_HANDS = 1
+        const val DEFAULT_NUM_HANDS = 2
         const val OTHER_ERROR = 0
         const val GPU_ERROR = 1
     }
