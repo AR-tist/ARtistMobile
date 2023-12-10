@@ -14,12 +14,13 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.example.myapplication.HandLandmarkerHelper
+import com.example.myapplication.WebSocketServerManager
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class CameraControll (private var context : Context, private var viewModel: CameraViewModel, private var lifecycleOwner: LifecycleOwner, private var surfaceProvider: Preview.SurfaceProvider) : HandLandmarkerHelper.LandmarkerListener{
+class CameraControll (private var context : Context, private var viewModel: CameraViewModel, private var lifecycleOwner: LifecycleOwner, private var surfaceProvider: Preview.SurfaceProvider, var serverManager: WebSocketServerManager) : HandLandmarkerHelper.LandmarkerListener{
     lateinit var handLandmarkerHelper: HandLandmarkerHelper
 
 
@@ -44,7 +45,8 @@ class CameraControll (private var context : Context, private var viewModel: Came
                 minHandPresenceConfidence = viewModel.currentMinHandPresenceConfidence,
                 maxNumHands = viewModel.currentMaxHands,
                 currentDelegate = viewModel.currentDelegate,
-                handLandmarkerHelperListener = this
+                handLandmarkerHelperListener = this,
+                serverManager = serverManager
             )
         }
     }

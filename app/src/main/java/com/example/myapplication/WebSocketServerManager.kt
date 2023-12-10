@@ -29,6 +29,9 @@ class WebSocketServerManager(private val ipAddress: String, private val port: In
         return server?.isReadyReceived ?: false
     }
 
+    fun isRunning(): Boolean {
+        return server?.isRunning ?: false
+    }
 
 
 }

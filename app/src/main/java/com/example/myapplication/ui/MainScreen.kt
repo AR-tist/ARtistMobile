@@ -156,6 +156,7 @@ fun MainScreen(serverManager: WebSocketServerManager, navController: NavControll
             if (serverManager.isReadyReceived()) {
 //                navController.navigate("connected_screen")
                 navController.navigate("cameraScreen")
+                
                 break
             }
             Log.d("isReady", "isReady? = ${serverManager.isReadyReceived()}")

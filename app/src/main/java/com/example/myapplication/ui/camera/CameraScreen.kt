@@ -33,10 +33,12 @@ fun CameraScreen(
     serverManager: WebSocketServerManager
 ) {
 
+
 //    val cameraState: CameraState by viewModel.state.collectAsStateWithLifecycle()
 
     CameraContent(
-        viewModel = viewModel
+        viewModel = viewModel,
+        serverManager = serverManager
 //        onPhotoCaptured = viewModel::onPhotoCaptured
     )
 //
@@ -70,7 +72,8 @@ private fun CapturedImageBitmapDialog(
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 private fun CameraContent(
-    viewModel: CameraViewModel
+    viewModel: CameraViewModel,
+    serverManager: WebSocketServerManager
 //    onPhotoCaptured: (Bitmap) -> Unit
 ) {
 
@@ -91,18 +94,9 @@ private fun CameraContent(
                     implementationMode = PreviewView.ImplementationMode.COMPATIBLE
                     scaleType = PreviewView.ScaleType.FILL_START
                 }.also { previewView ->
-                    var camera = CameraControll(context, viewModel, lifecycleOwner, previewView.surfaceProvider)
+                    var camera = CameraControll(context, viewModel, lifecycleOwner, previewView.surfaceProvider, serverManager)
                 }
             }
         )
     }
-}
-
-@Preview
-@Composable
-private fun Preview_CameraContent() {
-    CameraContent(
-        viewModel = viewModel()
-//        onPhotoCaptured = {}
-    )
 }
