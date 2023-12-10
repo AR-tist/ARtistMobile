@@ -1,5 +1,6 @@
 package com.example.myapplication
 
+import android.util.Log
 import kotlinx.coroutines.*
 
 class WebSocketServerManager(private val ipAddress: String, private val port: Int) {
@@ -23,7 +24,10 @@ class WebSocketServerManager(private val ipAddress: String, private val port: In
     }
 
     fun isReadyReceived(): Boolean {
+        Log.d("WSMANAGER", "${server?.isReadyReceived()}")
         return server?.isReadyReceived ?: false
     }
+
+
 
 }

@@ -10,8 +10,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import com.example.myapplication.ui.MainScreen
+import androidx.navigation.NavHost
+import androidx.navigation.compose.rememberNavController
+import com.example.myapplication.ui.ConnectedScreen
+import com.example.myapplication.ui.*
 import com.example.myapplication.ui.theme.MyApplicationTheme
+
+
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.composable
+
 @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 class MainActivity : ComponentActivity() {
     private lateinit var serverManager: WebSocketServerManager
@@ -26,7 +37,7 @@ class MainActivity : ComponentActivity() {
             MyApplicationTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-                    MainScreen(serverManager = serverManager)
+                    AppNavigation(serverManager = serverManager)
                 }
             }
         }
@@ -42,9 +53,20 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
     Text(
-            text = "Hello $name!",
-            modifier = modifier
+        text = "Hello $name!",
+        modifier = modifier
     )
+}
+
+@Composable
+@androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
+fun AppNavigation(serverManager: WebSocketServerManager) {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "main_screen") {
+        composable("main_screen") { MainScreen(serverManager = serverManager, navController = navController) }
+        composable("connected_screen") { ConnectedScreen(webSocketServerManager = serverManager) }
+        // 기타 목적지 정의
+    }
 }
 
 @Preview(showBackground = true)
