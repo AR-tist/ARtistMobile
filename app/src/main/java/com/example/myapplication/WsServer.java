@@ -64,7 +64,7 @@ public class WsServer extends WebSocketServer {
         if ("ready".equals(message)) {
             readyReceived = true;
             // 추가적인 동작 수행...
-            ServerStatus.value = ServerStatus.Running;
+//            ServerStatus.value = ServerStatus.Running;
 
         }
     }

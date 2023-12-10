@@ -93,8 +93,17 @@ private fun MainContent(webSocketServerManager: WebSocketServerManager, navContr
 
         Button(onClick = {
             navController.navigate("connected_screen")
+//            navController.navigate("cameraScreen")
         }) {
             Text(text = "연결 된 화면으로 강제이동")
+        }
+
+        // add disconnect ws button
+        Button(onClick = {
+            webSocketServerManager.stopServer()
+            serverStatus.value = ServerStatus.Stopped
+        }) {
+            Text(text = "웹소켓 서버 중지")
         }
 
         when (serverStatus.value) {
@@ -145,7 +154,8 @@ fun MainScreen(serverManager: WebSocketServerManager, navController: NavControll
     LaunchedEffect(key1 = Unit) {
         while (true) {
             if (serverManager.isReadyReceived()) {
-                navController.navigate("connected_screen")
+//                navController.navigate("connected_screen")
+                navController.navigate("cameraScreen")
                 break
             }
             Log.d("isReady", "isReady? = ${serverManager.isReadyReceived()}")

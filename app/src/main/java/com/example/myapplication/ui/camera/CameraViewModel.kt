@@ -7,7 +7,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class CameraViewModel : ViewModel() {
-//    private var _delegate: Int = HandLandmarkerHelper.DELEGATE_GPU
+
+//    val socketManager: Any
+
+    //    private var _delegate: Int = HandLandmarkerHelper.DELEGATE_GPU
         private var _delegate: Int = HandLandmarkerHelper.DELEGATE_CPU
     private var _minHandDetectionConfidence: Float =
         HandLandmarkerHelper.DEFAULT_HAND_DETECTION_CONFIDENCE

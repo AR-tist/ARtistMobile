@@ -16,6 +16,7 @@ class WebSocketServerManager(private val ipAddress: String, private val port: In
 
     fun stopServer() {
         server?.stop(0)
+        Log.d("wsServer","연결 끊기")
     }
 
     fun broadcast(message: String) {

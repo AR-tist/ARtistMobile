@@ -24,11 +24,13 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.example.myapplication.WebSocketServerManager
 
 @Composable
 fun CameraScreen(
     viewModel: CameraViewModel = viewModel(),
-    navController: NavController
+    navController: NavController,
+    serverManager: WebSocketServerManager
 ) {
 
 //    val cameraState: CameraState by viewModel.state.collectAsStateWithLifecycle()

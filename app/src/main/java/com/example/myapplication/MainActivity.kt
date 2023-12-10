@@ -10,7 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHost
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.ui.ConnectedScreen
 import com.example.myapplication.ui.*
@@ -18,10 +18,8 @@ import com.example.myapplication.ui.theme.MyApplicationTheme
 
 
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
+import com.example.myapplication.ui.camera.CameraScreen
 
 @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 class MainActivity : ComponentActivity() {
@@ -63,8 +61,11 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 fun AppNavigation(serverManager: WebSocketServerManager) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "main_screen") {
-        composable("main_screen") { MainScreen(serverManager = serverManager, navController = navController) }
+        composable("main_screen") { MainScreen(serverManager = serverManager, navController) }
         composable("connected_screen") { ConnectedScreen(webSocketServerManager = serverManager) }
+        composable("cameraScreen") {
+            CameraScreen(serverManager = serverManager, navController = navController)
+        }
         // 기타 목적지 정의
     }
 }
