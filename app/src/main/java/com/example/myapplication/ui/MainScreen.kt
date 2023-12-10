@@ -27,8 +27,6 @@ import androidx.compose.runtime.remember
 
 import androidx.compose.runtime.*
 import com.google.accompanist.permissions.shouldShowRationale
-import com.google.zxing.*
-import com.google.zxing.common.HybridBinarizer
 import java.util.concurrent.Executors
 
 import androidx.camera.core.ExperimentalGetImage
@@ -41,15 +39,17 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.camera.view.PreviewView
 import androidx.camera.core.Preview
-import androidx.navigation.NavController
 
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
 import com.example.myapplication.WebSocketServerManager
 import kotlinx.coroutines.delay
 
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.composable
+
+import java.net.BindException
 
 import java.net.NetworkInterface
 import java.util.*
@@ -87,17 +87,19 @@ private fun MainContent(webSocketServerManager: WebSocketServerManager) {
 //    val previewView = remember { PreviewView(context) }
 
     val serverStatus = remember { mutableStateOf(ServerStatus.Stopped) }
-    val serverManager = remember { WebSocketServerManager("0.0.0.0", 4439) } // 예시 IP 및 포트
 
     val localIpAddress = getLocalIpAddress()
     Column(modifier = Modifier.padding(16.dp)) {
-        Text("나의 로컬 네트워크 아이피: 172.16.234.1", fontSize = 18.sp)
+        Text("나의 로컬 네트워크 아이피: $localIpAddress", fontSize = 18.sp)
 
         Button(onClick = {
             serverStatus.value = ServerStatus.Starting
             try {
-                serverManager.startServer()
+                webSocketServerManager.startServer()
                 serverStatus.value = ServerStatus.Running
+            } catch (e: BindException) {
+                println("Error: Port is already in use. Please choose a different port.")
+                serverStatus.value = ServerStatus.Stopped
             } catch (e: Exception) {
                 e.printStackTrace()
                 serverStatus.value = ServerStatus.Stopped
@@ -114,52 +116,14 @@ private fun MainContent(webSocketServerManager: WebSocketServerManager) {
 
     }
 }
-@ExperimentalGetImage
-
-fun startQrCodeScanner(context: Context, lifecycleOwner: LifecycleOwner, previewView: PreviewView, onQrCodeDetected: (String) -> Unit) {
-    val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-    cameraProviderFuture.addListener({
-        val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
-        val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-        val preview = Preview.Builder().build().also {
-            it.setSurfaceProvider(previewView.surfaceProvider)
-        }
-        val imageAnalysis = ImageAnalysis.Builder().build().also {
-            it.setAnalyzer(Executors.newSingleThreadExecutor()) { imageProxy ->
-                val frame = imageProxy.image
-                if (frame != null) {
-                    val buffer = frame.planes[0].buffer
-                    val data = ByteArray(buffer.remaining())
-                    buffer.get(data)
-                    val source = PlanarYUVLuminanceSource(data, frame.width, frame.height, 0, 0, frame.width, frame.height, false)
-                    val binaryBitmap = BinaryBitmap(HybridBinarizer(source))
-                    try {
-                        val result = MultiFormatReader().apply {
-                            setHints(mapOf(DecodeHintType.POSSIBLE_FORMATS to listOf(BarcodeFormat.QR_CODE)))
-                        }.decode(binaryBitmap)
-                        onQrCodeDetected(result.text)
-                    } catch (e: Exception) {
-                        // QR 코드 인식 실패 처리
-                    } finally {
-                        imageProxy.close()
-                    }
-                }
-            }
-        }
-        try {
-            cameraProvider.unbindAll()
-            cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalysis)
-        } catch (exc: Exception) {
-            Log.e("CameraXApp", "카메라 바인딩에 실패했습니다.", exc)
-        }
-    }, ContextCompat.getMainExecutor(context))
-}
 
 @Composable
-fun AppNavigation() {
+fun AppNavigation(serverManager: WebSocketServerManager) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "profile") {
-        composable("connected") { ConnectedScreen(/*...*/) }
+    NavHost(navController = navController, startDestination = "mainScreen") {
+        composable("mainScreen") { MainScreen(serverManager)}
+        composable("connectedScreen") { ConnectedScreen(/*...*/) }
+        // 기타 목적지 정의
     }
 }
 
@@ -183,9 +147,10 @@ fun MainScreen(serverManager: WebSocketServerManager) {
     LaunchedEffect(key1 = Unit) {
         while (true) {
             if (serverManager.isReadyReceived()) {
-                navController.navigate("newScreen")
+                navController.navigate("connectedScreen")
                 break
             }
+            Log.d("isReady", "isReady? = ${serverManager.isReadyReceived()}")
             delay(1000) // 1초마다 확인
         }
     }
