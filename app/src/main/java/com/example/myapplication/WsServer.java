@@ -2,6 +2,8 @@ package com.example.myapplication;
 
 import android.util.Log;
 
+import com.example.myapplication.ui.ServerStatus;
+
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
@@ -62,6 +64,8 @@ public class WsServer extends WebSocketServer {
         if ("ready".equals(message)) {
             readyReceived = true;
             // 추가적인 동작 수행...
+            ServerStatus.value = ServerStatus.Running;
+
         }
     }
 

@@ -1,61 +1,36 @@
 package com.example.myapplication.ui
 
-import android.content.Context
 import android.util.Log
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.compose.runtime.Composable
-import com.example.myapplication.ui.camera.CameraScreen
-import com.example.myapplication.ui.no_permission.NoPermissionScreen
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionState
-import com.google.accompanist.permissions.isGranted
-
-import com.google.accompanist.permissions.rememberPermissionState
-
+import androidx.camera.core.ExperimentalGetImage
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-
 import androidx.compose.runtime.*
-import com.google.accompanist.permissions.shouldShowRationale
-import java.util.concurrent.Executors
-
-import androidx.camera.core.ExperimentalGetImage
-import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.LifecycleOwner
-
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.camera.view.PreviewView
-import androidx.camera.core.Preview
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.ui.Alignment
-
-import com.example.myapplication.WebSocketServerManager
-import kotlinx.coroutines.delay
-
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.rememberNavController
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.compose.composable
-
+import com.example.myapplication.WebSocketServerManager
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
+import kotlinx.coroutines.delay
 import java.net.BindException
-
 import java.net.NetworkInterface
 import java.util.*
+
 
 fun getLocalIpAddress(): String {
     try {
@@ -77,7 +52,12 @@ fun getLocalIpAddress(): String {
 }
 
 enum class ServerStatus {
-    Stopped, Starting, Running
+    Stopped, Starting, Running;
+
+    companion object {
+        @JvmField
+        var value: ServerStatus =  Stopped
+    }
 }
 
 
