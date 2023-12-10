@@ -62,9 +62,9 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 fun AppNavigation(serverManager: WebSocketServerManager) {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "mainScreen") {
-        composable("mainScreen") { MainScreen(serverManager = serverManager) }
-        composable("connectedScreen") { ConnectedScreen() }
+    NavHost(navController = navController, startDestination = "main_screen") {
+        composable("main_screen") { MainScreen(serverManager = serverManager, navController = navController) }
+        composable("connected_screen") { ConnectedScreen(webSocketServerManager = serverManager) }
         // 기타 목적지 정의
     }
 }

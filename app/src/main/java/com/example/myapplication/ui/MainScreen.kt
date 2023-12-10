@@ -39,6 +39,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.camera.view.PreviewView
 import androidx.camera.core.Preview
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Alignment
 
 import com.example.myapplication.WebSocketServerManager
 import kotlinx.coroutines.delay
@@ -80,11 +83,11 @@ enum class ServerStatus {
 
 @Composable
 @ExperimentalGetImage
-private fun MainContent(webSocketServerManager: WebSocketServerManager) {
+private fun MainContent(webSocketServerManager: WebSocketServerManager, navController: NavController) {
     var qrCodeValue by remember { mutableStateOf("") }
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-//    val previewView = remember { PreviewView(context) }
+
 
     val serverStatus = remember { mutableStateOf(ServerStatus.Stopped) }
 
@@ -108,6 +111,12 @@ private fun MainContent(webSocketServerManager: WebSocketServerManager) {
             Text("웹소켓 서버 시작")
         }
 
+        Button(onClick = {
+            navController.navigate("connected_screen")
+        }) {
+            Text(text = "연결 된 화면으로 강제이동")
+        }
+
         when (serverStatus.value) {
             ServerStatus.Starting -> Text("서버 시작 중...")
             ServerStatus.Running -> Text("서버 실행 중...")
@@ -116,29 +125,38 @@ private fun MainContent(webSocketServerManager: WebSocketServerManager) {
 
     }
 }
-
 @Composable
-fun AppNavigation(serverManager: WebSocketServerManager) {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "mainScreen") {
-        composable("mainScreen") { MainScreen(serverManager)}
-        composable("connectedScreen") { ConnectedScreen(/*...*/) }
-        // 기타 목적지 정의
+fun ConnectedScreen(webSocketServerManager: WebSocketServerManager) {
+    Text("연결이 확인 됐습니다")
+
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        ButtonWithBroadcast(webSocketServerManager, "도")
+        Spacer(modifier = Modifier.height(8.dp))
+        ButtonWithBroadcast(webSocketServerManager, "레")
+        Spacer(modifier = Modifier.height(8.dp))
+        ButtonWithBroadcast(webSocketServerManager, "미")
+        Spacer(modifier = Modifier.height(8.dp))
+        ButtonWithBroadcast(webSocketServerManager, "파")
+        Spacer(modifier = Modifier.height(8.dp))
+        ButtonWithBroadcast(webSocketServerManager, "솔")
     }
 }
-
 @Composable
-fun ConnectedScreen() {
-    Text("연결이 확인 됐습니다")
+fun ButtonWithBroadcast(webSocketServerManager: WebSocketServerManager, note: String) {
+    Button(onClick = { webSocketServerManager.broadcast(note) }) {
+        Text(text = note)
+    }
 }
-
 
 @ExperimentalGetImage
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MainScreen(serverManager: WebSocketServerManager) {
+fun MainScreen(serverManager: WebSocketServerManager, navController: NavController) {
     val cameraPermissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
-    val navController = rememberNavController()
 
     LaunchedEffect(key1 = true) {
         cameraPermissionState.launchPermissionRequest()
@@ -147,7 +165,7 @@ fun MainScreen(serverManager: WebSocketServerManager) {
     LaunchedEffect(key1 = Unit) {
         while (true) {
             if (serverManager.isReadyReceived()) {
-                navController.navigate("connectedScreen")
+                navController.navigate("connected_screen")
                 break
             }
             Log.d("isReady", "isReady? = ${serverManager.isReadyReceived()}")
@@ -158,7 +176,7 @@ fun MainScreen(serverManager: WebSocketServerManager) {
 
     when {
         cameraPermissionState.status.isGranted -> {
-            MainContent(serverManager)
+            MainContent(serverManager, navController)
         }
         cameraPermissionState.status.shouldShowRationale -> {
             Text("이 앱은 카메라 접근 권한이 필요합니다.")
