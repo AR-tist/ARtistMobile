@@ -57,9 +57,7 @@ class HandLandmarkerHelper(
     // 웹 소켓 서버를 생성하고 시작합니다.
 //    val serverManager = WebSocketServerManager("0.0.0.0", 4439)
     init {
-        serverManager?.startServer()
-
-        Log.d("짜증나", serverManager.toString());
+        Log.d("준엽", serverManager.toString());
         serverManager?.broadcast("연결성공")
         setupHandLandmarker()
     }
@@ -368,7 +366,7 @@ class HandLandmarkerHelper(
     }
 
     private fun onResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
-        serverManager?.broadcast(resultBundle.results.first().toString())
+//        serverManager?.broadcast(resultBundle.results.first().toString())
 
         val landmarksList = resultBundle.results.first().landmarks()
         val handednessList = resultBundle.results.first().handednesses()
@@ -418,15 +416,6 @@ class HandLandmarkerHelper(
             LeftCalibration(secondHandLandmarks)
         }
 
-        // Add logging to check WebSocket connection state
-        if (serverManager?.isRunning() == true) {
-            Log.d("민규", "WebSocket connection is running. Broadcasting message.")
-            serverManager?.broadcast("하이")
-        } else {
-            Log.d("민규", "WebSocket connection is not running. Message not broadcasted.")
-        }
-
-
     }
 
 
@@ -466,6 +455,7 @@ class HandLandmarkerHelper(
         if(A < B){
             Log.d("준엽", "오른손 0번째 손가락이 굽었습니다. $distance11" )
             serverManager?.broadcast("하이")
+            Log.d("민규", "$serverManager WebSocket connection is running. Broadcasting message.")
         }
          if(distance1 < 3.0)
          {
