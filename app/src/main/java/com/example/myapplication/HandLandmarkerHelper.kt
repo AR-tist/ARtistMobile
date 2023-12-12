@@ -406,11 +406,11 @@ class HandLandmarkerHelper(
         val secondHandLandmarks = landmarksList.getOrNull(1)
 
         if(handType1 == "Left hand"){
-//            LeftCalibration(firstHandLandmarks)
+            LeftCalibration(firstHandLandmarks)
             RightCalibration(secondHandLandmarks)
         }else{
             RightCalibration(firstHandLandmarks)
-//            LeftCalibration(secondHandLandmarks)
+            LeftCalibration(secondHandLandmarks)
         }
 
 
@@ -491,12 +491,42 @@ class HandLandmarkerHelper(
 //             Log.d("준엽", "오른손 4번째 손가락이 굽었습니다. $distance4" )
 //         }
 
-        var X = firstHandLandmarks[4].x()
-        var Y = firstHandLandmarks[4].y()
+        var X4 = firstHandLandmarks[4].x()
+        var Y4 = firstHandLandmarks[4].y()
 
-        serverManager?.broadcast("x : $X, y : $Y")
+        var X8 = firstHandLandmarks[8].x()
+        var Y8 = firstHandLandmarks[8].y()
 
-        // Log.d("민규", "x : $X, y : $Y")
+        var X12 = firstHandLandmarks[12].x()
+        var Y12 = firstHandLandmarks[12].y()
+
+        var X16 = firstHandLandmarks[16].x()
+        var Y16 = firstHandLandmarks[16].y()
+
+        var X20 = firstHandLandmarks[20].x()
+        var Y20 = firstHandLandmarks[20].y()
+
+        // list에 담아서 보내야함.
+        var X = listOf(X4, X8, X12, X16, X20)
+        var Y = listOf(Y4, Y8, Y12, Y16, Y20)
+
+//        var pointList = mutableListOf<PointForBrodcast>()
+//
+//        for (i in 0..4) {
+//            pointList.add(PointForBrodcast(i, X[i], Y[i])  )
+//        }
+//
+//        var coordinates = "1? $pointList"
+//
+//        serverManager?.broadcast(coordinates)
+//
+//
+//         Log.d("민규", "$coordinates")
+
+        var test = "1? $X ? $Y"
+        serverManager?.broadcast(test)
+
+        Log.d("민규",test)
     }
 
 
@@ -539,6 +569,43 @@ class HandLandmarkerHelper(
              {
                  Log.d("준엽", "왼손 4번째 손가락이 굽었습니다. $distance4" )
              }
+
+        var X4 = secondHandLandmarks[4].x()
+        var Y4 = secondHandLandmarks[4].y()
+
+        var X8 = secondHandLandmarks[8].x()
+        var Y8 = secondHandLandmarks[8].y()
+
+        var X12 = secondHandLandmarks[12].x()
+        var Y12 = secondHandLandmarks[12].y()
+
+        var X16 = secondHandLandmarks[16].x()
+        var Y16 = secondHandLandmarks[16].y()
+
+        var X20 = secondHandLandmarks[20].x()
+        var Y20 = secondHandLandmarks[20].y()
+
+        // list에 담아서 보내야함.
+        var X = listOf(X4, X8, X12, X16, X20)
+        var Y = listOf(Y4, Y8, Y12, Y16, Y20)
+
+//        var pointList = mutableListOf<PointForBrodcast>()
+//
+//        for (i in 0..4) {
+//            pointList.add(PointForBrodcast(i, X[i], Y[i])  )
+//        }
+//
+//        var coordinates = "1? $pointList"
+//
+//        serverManager?.broadcast(coordinates)
+//
+//
+//         Log.d("민규", "$coordinates")
+
+        var test1 = "0? $X ? $Y"
+        serverManager?.broadcast(test1)
+
+        Log.d("민규",test1)
 
     }
 
