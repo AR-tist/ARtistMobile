@@ -92,8 +92,8 @@ private fun MainContent(webSocketServerManager: WebSocketServerManager, navContr
         }
 
         Button(onClick = {
-            navController.navigate("connected_screen")
-//            navController.navigate("cameraScreen")
+//            navController.navigate("connected_screen")
+            navController.navigate("cameraScreen")
         }) {
             Text(text = "연결 된 화면으로 강제이동")
         }
@@ -118,28 +118,28 @@ private fun MainContent(webSocketServerManager: WebSocketServerManager, navContr
 fun ConnectedScreen(webSocketServerManager: WebSocketServerManager) {
     Text("연결이 확인 됐습니다")
 
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        ButtonWithBroadcast(webSocketServerManager, "도")
-        Spacer(modifier = Modifier.height(8.dp))
-        ButtonWithBroadcast(webSocketServerManager, "레")
-        Spacer(modifier = Modifier.height(8.dp))
-        ButtonWithBroadcast(webSocketServerManager, "미")
-        Spacer(modifier = Modifier.height(8.dp))
-        ButtonWithBroadcast(webSocketServerManager, "파")
-        Spacer(modifier = Modifier.height(8.dp))
-        ButtonWithBroadcast(webSocketServerManager, "솔")
-    }
+//    Column(
+//        modifier = Modifier.fillMaxSize(),
+//        verticalArrangement = Arrangement.Center,
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        ButtonWithBroadcast(webSocketServerManager, "도")
+//        Spacer(modifier = Modifier.height(8.dp))
+//        ButtonWithBroadcast(webSocketServerManager, "레")
+//        Spacer(modifier = Modifier.height(8.dp))
+//        ButtonWithBroadcast(webSocketServerManager, "미")
+//        Spacer(modifier = Modifier.height(8.dp))
+//        ButtonWithBroadcast(webSocketServerManager, "파")
+//        Spacer(modifier = Modifier.height(8.dp))
+//        ButtonWithBroadcast(webSocketServerManager, "솔")
+//    }
 }
-@Composable
-fun ButtonWithBroadcast(webSocketServerManager: WebSocketServerManager, note: String) {
-    Button(onClick = { webSocketServerManager.broadcast(note) }) {
-        Text(text = note)
-    }
-}
+//@Composable
+//fun ButtonWithBroadcast(webSocketServerManager: WebSocketServerManager, note: String) {
+//    Button(onClick = { webSocketServerManager.broadcast(note) }) {
+//        Text(text = note)
+//    }
+//}
 
 @ExperimentalGetImage
 @OptIn(ExperimentalPermissionsApi::class)
@@ -156,7 +156,7 @@ fun MainScreen(serverManager: WebSocketServerManager, navController: NavControll
             if (serverManager.isReadyReceived()) {
 //                navController.navigate("connected_screen")
                 navController.navigate("cameraScreen")
-                
+
                 break
             }
             Log.d("isReady", "isReady? = ${serverManager.isReadyReceived()}")

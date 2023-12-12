@@ -113,4 +113,7 @@ dependencies {
 
     //permission
     implementation ("com.google.accompanist:accompanist-permissions:0.23.0")
+
+    //Json
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
 }

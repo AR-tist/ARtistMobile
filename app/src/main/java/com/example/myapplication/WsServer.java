@@ -7,11 +7,14 @@ import com.example.myapplication.ui.ServerStatus;
 import org.java_websocket.WebSocket;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+
+import kotlinx.serialization.json.Json;
 
 public class WsServer extends WebSocketServer {
 
@@ -111,6 +114,5 @@ public class WsServer extends WebSocketServer {
         running = true;
         Log.d(TAG, "onStart: ");
     }
-
 
 }

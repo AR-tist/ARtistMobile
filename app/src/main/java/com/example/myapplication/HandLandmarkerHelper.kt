@@ -32,6 +32,12 @@ import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.io.ByteArrayOutputStream
+import java.io.ObjectOutputStream
+import java.nio.ByteBuffer
 
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -58,7 +64,7 @@ class HandLandmarkerHelper(
 //    val serverManager = WebSocketServerManager("0.0.0.0", 4439)
     init {
         Log.d("준엽", serverManager.toString());
-        serverManager?.broadcast("연결성공")
+//        serverManager?.broadcast("연결성공")
         setupHandLandmarker()
     }
 
@@ -366,7 +372,7 @@ class HandLandmarkerHelper(
     }
 
     private fun onResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
-//        serverManager?.broadcast(resultBundle.results.first().toString())
+
 
         val landmarksList = resultBundle.results.first().landmarks()
         val handednessList = resultBundle.results.first().handednesses()
@@ -397,24 +403,29 @@ class HandLandmarkerHelper(
         }
 
         val firstHandLandmarks = landmarksList.getOrNull(0)
-//        if (firstHandLandmarks != null) {
-//            Log.d("민규", "$handType1 Landmarks: $firstHandLandmarks")
-//        }
-
         val secondHandLandmarks = landmarksList.getOrNull(1)
-//        if (secondHandLandmarks != null) {
-//            Log.d("민규", "$handType2 Landmarks: $secondHandLandmarks")
-//        }
-
-//        Log.d("민규", "Detected Hands: $handType1 + $handType2")
 
         if(handType1 == "Left hand"){
-            LeftCalibration(firstHandLandmarks)
+//            LeftCalibration(firstHandLandmarks)
             RightCalibration(secondHandLandmarks)
         }else{
             RightCalibration(firstHandLandmarks)
-            LeftCalibration(secondHandLandmarks)
+//            LeftCalibration(secondHandLandmarks)
         }
+
+
+//        var worldLandmarksList = resultBundle.results.first().worldLandmarks()
+//        var firstWorldHandLandmarks = worldLandmarksList.getOrNull(0)
+//
+//        var xCordinate = firstWorldHandLandmarks?.get(4)?.x()
+//        var yCordinate = firstWorldHandLandmarks?.get(4)?.y()
+//
+//        Log.d("준엽", "x : $xCordinate, y : $yCordinate")
+
+//        var xLandCordinate = firstHandLandmarks?.get(4)?.x()
+//        var yLandCordinate = firstHandLandmarks?.get(4)?.y()
+//
+//       Log.d("민규", "x : $xLandCordinate, y : $yLandCordinate")
 
     }
 
@@ -429,8 +440,14 @@ class HandLandmarkerHelper(
 
         return sqrt(sum)
     }
+    // 모든 점을 담을 수 있는 데이터 클래스만들어야함.
 
-    
+
+    @Serializable// hand Left : 0, Right : 1
+    data class Coordinates(var hand : Int ,val points: List<PointForBrodcast>)
+
+    @Serializable
+    data class PointForBrodcast(val marknum: Int, val x: Float, val y: Float)
 
     private fun RightCalibration(firstHandLandmarks: MutableList<NormalizedLandmark>?) {
 //    val calibratedValues = calibrate(firstHandLandmarks)
@@ -440,39 +457,46 @@ class HandLandmarkerHelper(
             Log.d("준엽", "Invalid number of landmarks")
             return
         }
+//
+////        var distance0 = euclideanDistance(Point(firstHandLandmarks[3].x(), firstHandLandmarks[3].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
+//        var distance1 = euclideanDistance(Point(firstHandLandmarks[8].x(), firstHandLandmarks[8].y()), Point(firstHandLandmarks[7].x(), firstHandLandmarks[7].y())) * 100
+//        var distance2 = euclideanDistance(Point(firstHandLandmarks[12].x(), firstHandLandmarks[12].y()), Point(firstHandLandmarks[11].x(), firstHandLandmarks[11].y())) * 100
+//        var distance3 = euclideanDistance(Point(firstHandLandmarks[16].x(), firstHandLandmarks[16].y()), Point(firstHandLandmarks[15].x(), firstHandLandmarks[15].y())) * 100
+//        var distance4 = euclideanDistance(Point(firstHandLandmarks[20].x(), firstHandLandmarks[20].y()), Point(firstHandLandmarks[19].x(), firstHandLandmarks[19].y())) * 100
+//
+//        var A = firstHandLandmarks[4].y()
+//        var B = firstHandLandmarks[3].y()
+//        var distance11 = A - B
+//        Log.d("지해", "$A $B")
+//
+//        if(A < B){
+//            Log.d("준엽", "오른손 0번째 손가락이 굽었습니다. $distance11" )
+//            serverManager?.broadcast("하이")
+//            Log.d("민규", "$serverManager WebSocket connection is running. Broadcasting message.")
+//        }
+//         if(distance1 < 3.0)
+//         {
+//             Log.d("준엽", "오른손 1번째 손가락이 굽었습니다. $distance1" )
+//         }
+//         if(distance2 < 3.0)
+//         {
+//             Log.d("준엽", "오른손 2번째 손가락이 굽었습니다. $distance2" )
+//         }
+//         if(distance3 < 3.25)
+//         {
+//             Log.d("준엽", "오른손 3번째 손가락이 굽었습니다. $distance3" )
+//         }
+//         if(distance4 < 3.0)
+//         {
+//             Log.d("준엽", "오른손 4번째 손가락이 굽었습니다. $distance4" )
+//         }
 
-//        var distance0 = euclideanDistance(Point(firstHandLandmarks[3].x(), firstHandLandmarks[3].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
-        var distance1 = euclideanDistance(Point(firstHandLandmarks[8].x(), firstHandLandmarks[8].y()), Point(firstHandLandmarks[7].x(), firstHandLandmarks[7].y())) * 100
-        var distance2 = euclideanDistance(Point(firstHandLandmarks[12].x(), firstHandLandmarks[12].y()), Point(firstHandLandmarks[11].x(), firstHandLandmarks[11].y())) * 100
-        var distance3 = euclideanDistance(Point(firstHandLandmarks[16].x(), firstHandLandmarks[16].y()), Point(firstHandLandmarks[15].x(), firstHandLandmarks[15].y())) * 100
-        var distance4 = euclideanDistance(Point(firstHandLandmarks[20].x(), firstHandLandmarks[20].y()), Point(firstHandLandmarks[19].x(), firstHandLandmarks[19].y())) * 100
+        var X = firstHandLandmarks[4].x()
+        var Y = firstHandLandmarks[4].y()
 
-        var A = firstHandLandmarks[4].y()
-        var B = firstHandLandmarks[3].y()
-        var distance11 = A - B
-        Log.d("지해", "$A $B")
+        serverManager?.broadcast("x : $X, y : $Y")
 
-        if(A < B){
-            Log.d("준엽", "오른손 0번째 손가락이 굽었습니다. $distance11" )
-            serverManager?.broadcast("하이")
-            Log.d("민규", "$serverManager WebSocket connection is running. Broadcasting message.")
-        }
-         if(distance1 < 3.0)
-         {
-             Log.d("준엽", "오른손 1번째 손가락이 굽었습니다. $distance1" )
-         }
-         if(distance2 < 3.0)
-         {
-             Log.d("준엽", "오른손 2번째 손가락이 굽었습니다. $distance2" )
-         }
-         if(distance3 < 3.25)
-         {
-             Log.d("준엽", "오른손 3번째 손가락이 굽었습니다. $distance3" )
-         }
-         if(distance4 < 3.0)
-         {
-             Log.d("준엽", "오른손 4번째 손가락이 굽었습니다. $distance4" )
-         }
+        // Log.d("민규", "x : $X, y : $Y")
     }
 
 
