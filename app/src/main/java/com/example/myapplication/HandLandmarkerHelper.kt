@@ -556,27 +556,27 @@ class HandLandmarkerHelper(
 
             if(A < B){
                 Log.d("준엽", "왼손 0번째 손가락이 굽었습니다. $distance11" )
-                serverManager?.broadcast("1! 1? 0")
+                serverManager?.broadcast("1! 0? 0")
             }
              if(distance1 < 3.0)
              {
                 Log.d("준엽", "왼손 1번째 손가락이 굽었습니다. $distance1" )
-                serverManager?.broadcast("1! 1? 1")
+                serverManager?.broadcast("1! 0? 1")
              }
              if(distance2 < 3.0)
              {
                 Log.d("준엽", "왼손 2번째 손가락이 굽었습니다. $distance2" )
-                serverManager?.broadcast("1! 1? 2")
+                serverManager?.broadcast("1! 0? 2")
              }
              if(distance3 < 3.25)
              {
                 Log.d("준엽", "왼손 3번째 손가락이 굽었습니다. $distance3" )
-                serverManager?.broadcast("1! 1? 3")
+                serverManager?.broadcast("1! 0? 3")
              }
              if(distance4 < 3.0)
              {
                 Log.d("준엽", "왼손 4번째 손가락이 굽었습니다. $distance4" )
-                serverManager?.broadcast("1! 1? 4")
+                serverManager?.broadcast("1! 0? 4")
              }
 
         var X4 = secondHandLandmarks[4].x()
