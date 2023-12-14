@@ -464,7 +464,7 @@ class HandLandmarkerHelper(
             return
         }
 //
-       var distance0 = euclideanDistance(Point(firstHandLandmarks[3].x(), firstHandLandmarks[3].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
+        var distance0 = euclideanDistance(Point(firstHandLandmarks[4].x(), firstHandLandmarks[4].y()), Point(firstHandLandmarks[9].x(), firstHandLandmarks[9].y())) * 100
         var distance1 = euclideanDistance(Point(firstHandLandmarks[8].x(), firstHandLandmarks[8].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
         var distance2 = euclideanDistance(Point(firstHandLandmarks[12].x(), firstHandLandmarks[12].y()), Point(firstHandLandmarks[9].x(), firstHandLandmarks[9].y())) * 100
         var distance3 = euclideanDistance(Point(firstHandLandmarks[16].x(), firstHandLandmarks[16].y()), Point(firstHandLandmarks[13].x(), firstHandLandmarks[13].y())) * 100
@@ -473,13 +473,27 @@ class HandLandmarkerHelper(
         // var A = firstHandLandmarks[4].y()
         // var B = firstHandLandmarks[3].y()
         // var distance11 = A - B
-        Log.d("지해", "검지 ,$distance1")
-        Log.d("지해", "중지, $distance2")
-        Log.d("지해", "약지, $distance3")
-        Log.d("지해", "새끼, $distance4")
+//        Log.d("지해", "검지 ,$distance1")
+//        Log.d("지해", "중지, $distance2")
+//        Log.d("지해", "약지, $distance3")
+//        Log.d("지해", "새끼, $distance4")
+
+        Log.d("지해", "$distance0")
 
 
-        
+        if(distance0 < 11){
+            if(!rcheck0){
+                Log.d("준엽", "오른손 엄지가 굽었습니다. $distance0")
+                serverManager?.broadcast("1! 1? 0? 0")
+            }
+            rcheck0 = true;
+        }else{
+            if(rcheck0){
+                serverManager?.broadcast("1! 1? 0? 1")
+                Log.d("준엽", "오른손 엄지가 펴졌습니다. $distance0")
+            }
+            rcheck0 = false;
+        }
 
          if(distance1 < 20.0)
          {
@@ -592,11 +606,25 @@ class HandLandmarkerHelper(
             return
         }
 
-        // var distance0 = euclideanDistance(Point(secondHandLandmarks[3].x(), secondHandLandmarks[3].y()), Point(secondHandLandmarks[5].x(), secondHandLandmarks[5].y())) * 100
+        var distance0 = euclideanDistance(Point(secondHandLandmarks[4].x(), secondHandLandmarks[4].y()), Point(secondHandLandmarks[9].x(), secondHandLandmarks[9].y())) * 100
         var distance1 = euclideanDistance(Point(secondHandLandmarks[8].x(), secondHandLandmarks[8].y()), Point(secondHandLandmarks[7].x(), secondHandLandmarks[7].y())) * 100
         var distance2 = euclideanDistance(Point(secondHandLandmarks[12].x(), secondHandLandmarks[12].y()), Point(secondHandLandmarks[11].x(), secondHandLandmarks[11].y())) * 100
         var distance3 = euclideanDistance(Point(secondHandLandmarks[16].x(), secondHandLandmarks[16].y()), Point(secondHandLandmarks[15].x(), secondHandLandmarks[15].y())) * 100
         var distance4 = euclideanDistance(Point(secondHandLandmarks[20].x(), secondHandLandmarks[20].y()), Point(secondHandLandmarks[19].x(), secondHandLandmarks[19].y())) * 100
+
+        if(distance0 < 11){
+            if(!lcheck0) {
+                Log.d("준엽", "왼손 엄지가 굽었습니다. $distance0")
+                serverManager?.broadcast("1! 0? 0? 0")
+            }
+            lcheck0 = true;
+        }else{
+            if(lcheck0) {
+                serverManager?.broadcast("1! 0? 0? 1")
+                Log.d("준엽", "왼손 엄지가 펴졌습니다. $distance0")
+            }
+            lcheck0 = false;
+        }
 
         if(distance1 < 20){
             if(!lcheck1) {
