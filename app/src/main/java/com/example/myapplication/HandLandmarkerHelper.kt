@@ -446,6 +446,12 @@ class HandLandmarkerHelper(
     @Serializable// hand Left : 0, Right : 1
     data class Coordinates(var hand : Int ,val points: List<PointForBrodcast>)
 
+    var rcheck0 = false;
+    var rcheck1 = false;
+    var rcheck2 = false;
+    var rcheck3 = false;
+    var rcheck4 = false;
+
     @Serializable
     data class PointForBrodcast(val marknum: Int, val x: Float, val y: Float)
 
@@ -454,46 +460,85 @@ class HandLandmarkerHelper(
 
         // Ensure firstHandLandmarks is not null and contains at least 21 landmarks
         if (firstHandLandmarks == null || firstHandLandmarks.size < 21) {
-            Log.d("준엽", "Invalid number of landmarks")
+//            Log.d("준엽", "Invalid number of landmarks")
             return
         }
 //
-//        var distance0 = euclideanDistance(Point(firstHandLandmarks[3].x(), firstHandLandmarks[3].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
-        var distance1 = euclideanDistance(Point(firstHandLandmarks[8].x(), firstHandLandmarks[8].y()), Point(firstHandLandmarks[7].x(), firstHandLandmarks[7].y())) * 100
-        var distance2 = euclideanDistance(Point(firstHandLandmarks[12].x(), firstHandLandmarks[12].y()), Point(firstHandLandmarks[11].x(), firstHandLandmarks[11].y())) * 100
-        var distance3 = euclideanDistance(Point(firstHandLandmarks[16].x(), firstHandLandmarks[16].y()), Point(firstHandLandmarks[15].x(), firstHandLandmarks[15].y())) * 100
-        var distance4 = euclideanDistance(Point(firstHandLandmarks[20].x(), firstHandLandmarks[20].y()), Point(firstHandLandmarks[19].x(), firstHandLandmarks[19].y())) * 100
+       var distance0 = euclideanDistance(Point(firstHandLandmarks[3].x(), firstHandLandmarks[3].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
+        var distance1 = euclideanDistance(Point(firstHandLandmarks[8].x(), firstHandLandmarks[8].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
+        var distance2 = euclideanDistance(Point(firstHandLandmarks[12].x(), firstHandLandmarks[12].y()), Point(firstHandLandmarks[9].x(), firstHandLandmarks[9].y())) * 100
+        var distance3 = euclideanDistance(Point(firstHandLandmarks[16].x(), firstHandLandmarks[16].y()), Point(firstHandLandmarks[13].x(), firstHandLandmarks[13].y())) * 100
+        var distance4 = euclideanDistance(Point(firstHandLandmarks[20].x(), firstHandLandmarks[20].y()), Point(firstHandLandmarks[17].x(), firstHandLandmarks[17].y())) * 100
 
-        var A = firstHandLandmarks[4].y()
-        var B = firstHandLandmarks[3].y()
-        var distance11 = A - B
-        Log.d("지해", "$A $B")
+        // var A = firstHandLandmarks[4].y()
+        // var B = firstHandLandmarks[3].y()
+        // var distance11 = A - B
+        Log.d("지해", "검지 ,$distance1")
+        Log.d("지해", "중지, $distance2")
+        Log.d("지해", "약지, $distance3")
+        Log.d("지해", "새끼, $distance4")
 
-//        if(A < B){
-//            Log.d("준엽", "오른손 0번째 손가락이 굽었습니다. $distance11" )
-//            serverManager?.broadcast("1! 1? 0")
-//        }
 
-         if(distance1 < 3.0)
+        
+
+         if(distance1 < 20.0)
          {
-            Log.d("준엽", "오른손 1번째 손가락이 굽었습니다. $distance1" )
-            serverManager?.broadcast("1! 1? 1")
+            if(!rcheck1) {
+                 Log.d("준엽", "오른손 1번째 손가락이 굽었습니다. $distance1")
+                 serverManager?.broadcast("1! 1? 1? 0")
+             }
+            rcheck1 = true;
+         }else{
+             if(rcheck1) {
+                 serverManager?.broadcast("1! 1? 1? 1")
+                 Log.d("준엽", "오른손 1번째 손가락이 펴졌습니다. $distance1")
+             }
+             rcheck1 = false;
          }
-         if(distance2 < 3.0)
+         if(distance2 < 25.0)
          {
-            Log.d("준엽", "오른손 2번째 손가락이 굽었습니다. $distance2" )
-            serverManager?.broadcast("1! 1? 2")
+            if(!rcheck2) {
+                Log.d("준엽", "오른손 2번째 손가락이 굽었습니다. $distance2")
+                serverManager?.broadcast("1! 1? 2? 0")
+            }
+            rcheck2 = true;
+         }else{
+            if(rcheck2) {
+                serverManager?.broadcast("1! 1? 2? 1")
+                Log.d("준엽", "오른손 2번째 손가락이 펴졌습니다. $distance2")
+            }
+            rcheck2 = false;
          }
-         if(distance3 < 3.25)
-         {
-            Log.d("준엽", "오른손 3번째 손가락이 굽었습니다. $distance3" )
-            serverManager?.broadcast("1! 1? 3")
-         }
-         if(distance4 < 3.0)
-         {
-            Log.d("준엽", "오른손 4번째 손가락이 굽었습니다. $distance4" )
-            serverManager?.broadcast("1! 1? 4")
-         }
+
+        if(distance3 < 20.0)
+        {
+            if(!rcheck3) {
+                Log.d("준엽", "오른손 3번째 손가락이 굽었습니다. $distance3")
+                serverManager?.broadcast("1! 1? 3? 0")
+            }
+            rcheck3 = true;
+        }else{
+            if(rcheck3) {
+                serverManager?.broadcast("1! 1? 3? 1")
+                Log.d("준엽", "오른손 3번째 손가락이 펴졌습니다. $distance3")
+            }
+            rcheck3 = false;
+        }
+
+        if(distance4 < 20.0)
+        {
+            if(!rcheck4) {
+                Log.d("준엽", "오른손 4번째 손가락이 굽었습니다. $distance4")
+                serverManager?.broadcast("1! 1? 4? 0")
+            }
+            rcheck4 = true;
+        }else{
+            if(rcheck4) {
+                serverManager?.broadcast("1! 1? 4? 1")
+                Log.d("준엽", "오른손 4번째 손가락이 펴졌습니다. $distance4")
+            }
+            rcheck4 = false;
+        }
 
         var X4 = firstHandLandmarks[4].x()
         var Y4 = firstHandLandmarks[4].y()
@@ -533,52 +578,82 @@ class HandLandmarkerHelper(
         Log.d("민규",test)
     }
 
-
+    var lcheck0 = false;
+    var lcheck1 = false;
+    var lcheck2 = false;
+    var lcheck3 = false;
+    var lcheck4 = false;
 
 
     private fun LeftCalibration(secondHandLandmarks: MutableList<NormalizedLandmark>?) {
         
         if (secondHandLandmarks == null || secondHandLandmarks.size < 21) {
-                Log.d("준엽", "Invalid number of landmarks")
-                return
+            Log.d("준엽", "Invalid number of landmarks")
+            return
+        }
+
+        // var distance0 = euclideanDistance(Point(secondHandLandmarks[3].x(), secondHandLandmarks[3].y()), Point(secondHandLandmarks[5].x(), secondHandLandmarks[5].y())) * 100
+        var distance1 = euclideanDistance(Point(secondHandLandmarks[8].x(), secondHandLandmarks[8].y()), Point(secondHandLandmarks[7].x(), secondHandLandmarks[7].y())) * 100
+        var distance2 = euclideanDistance(Point(secondHandLandmarks[12].x(), secondHandLandmarks[12].y()), Point(secondHandLandmarks[11].x(), secondHandLandmarks[11].y())) * 100
+        var distance3 = euclideanDistance(Point(secondHandLandmarks[16].x(), secondHandLandmarks[16].y()), Point(secondHandLandmarks[15].x(), secondHandLandmarks[15].y())) * 100
+        var distance4 = euclideanDistance(Point(secondHandLandmarks[20].x(), secondHandLandmarks[20].y()), Point(secondHandLandmarks[19].x(), secondHandLandmarks[19].y())) * 100
+
+        if(distance1 < 20){
+            if(!lcheck1) {
+                Log.d("준엽", "왼손 1번째 손가락이 굽었습니다. $distance1")
+                serverManager?.broadcast("1! 0? 1? 0")
             }
-
-//            var distance0 = euclideanDistance(Point(secondHandLandmarks[3].x(), secondHandLandmarks[3].y()), Point(secondHandLandmarks[5].x(), secondHandLandmarks[5].y())) * 100
-            var distance1 = euclideanDistance(Point(secondHandLandmarks[8].x(), secondHandLandmarks[8].y()), Point(secondHandLandmarks[7].x(), secondHandLandmarks[7].y())) * 100
-            var distance2 = euclideanDistance(Point(secondHandLandmarks[12].x(), secondHandLandmarks[12].y()), Point(secondHandLandmarks[11].x(), secondHandLandmarks[11].y())) * 100
-            var distance3 = euclideanDistance(Point(secondHandLandmarks[16].x(), secondHandLandmarks[16].y()), Point(secondHandLandmarks[15].x(), secondHandLandmarks[15].y())) * 100
-            var distance4 = euclideanDistance(Point(secondHandLandmarks[20].x(), secondHandLandmarks[20].y()), Point(secondHandLandmarks[19].x(), secondHandLandmarks[19].y())) * 100
-
-            var A = secondHandLandmarks[4].y()
-            var B = secondHandLandmarks[3].y()
-            var distance11 = A - B
-            Log.d("지해", "$A $B")
-
-            if(A < B){
-                Log.d("준엽", "왼손 0번째 손가락이 굽었습니다. $distance11" )
-                serverManager?.broadcast("1! 0? 0")
+            lcheck1 = true;
+        }else{
+            if(lcheck1) {
+                serverManager?.broadcast("1! 0? 1? 1")
+                Log.d("준엽", "왼손 1번째 손가락이 펴졌습니다. $distance1")
             }
-             if(distance1 < 3.0)
-             {
-                Log.d("준엽", "왼손 1번째 손가락이 굽었습니다. $distance1" )
-                serverManager?.broadcast("1! 0? 1")
-             }
-             if(distance2 < 3.0)
-             {
-                Log.d("준엽", "왼손 2번째 손가락이 굽었습니다. $distance2" )
-                serverManager?.broadcast("1! 0? 2")
-             }
-             if(distance3 < 3.25)
-             {
-                Log.d("준엽", "왼손 3번째 손가락이 굽었습니다. $distance3" )
-                serverManager?.broadcast("1! 0? 3")
-             }
-             if(distance4 < 3.0)
-             {
-                Log.d("준엽", "왼손 4번째 손가락이 굽었습니다. $distance4" )
-                serverManager?.broadcast("1! 0? 4")
-             }
+            lcheck1 = false;
+        }
 
+        if(distance2 < 25){
+            if(!lcheck2) {
+                Log.d("준엽", "왼손 2번째 손가락이 굽었습니다. $distance2")
+                serverManager?.broadcast("1! 0? 2? 0")
+            }
+            lcheck2 = true;
+        }else{
+            if(lcheck2) {
+                serverManager?.broadcast("1! 0? 2? 1")
+                Log.d("준엽", "왼손 2번째 손가락이 펴졌습니다. $distance2")
+            }
+            lcheck2 = false;
+        }
+
+        if(distance3 < 20){
+            if(!lcheck3) {
+                Log.d("준엽", "왼손 3번째 손가락이 굽었습니다. $distance3")
+                serverManager?.broadcast("1! 0? 3? 0")
+            }
+            lcheck3 = true;
+        }else{
+            if(lcheck3) {
+                serverManager?.broadcast("1! 0? 3? 1")
+                Log.d("준엽", "왼손 3번째 손가락이 펴졌습니다. $distance3")
+            }
+            lcheck3 = false;
+        }
+
+        if(distance4 < 20){
+            if(!lcheck4) {
+                Log.d("준엽", "왼손 4번째 손가락이 굽었습니다. $distance4")
+                serverManager?.broadcast("1! 0? 4? 0")
+            }
+            lcheck4 = true;
+        }else{
+            if(lcheck4) {
+                serverManager?.broadcast("1! 0? 4? 1")
+                Log.d("준엽", "왼손 4번째 손가락이 펴졌습니다. $distance4")
+            }
+            lcheck4 = false;
+        }
+        
         var X4 = secondHandLandmarks[4].x()
         var Y4 = secondHandLandmarks[4].y()
 
