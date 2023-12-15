@@ -26,6 +26,7 @@ import androidx.annotation.VisibleForTesting
 import androidx.camera.core.ImageProxy
 import com.google.mediapipe.framework.image.BitmapImageBuilder
 import com.google.mediapipe.framework.image.MPImage
+import com.google.mediapipe.tasks.components.containers.Landmark
 import com.google.mediapipe.tasks.components.containers.NormalizedLandmark
 import com.google.mediapipe.tasks.core.BaseOptions
 import com.google.mediapipe.tasks.core.Delegate
@@ -33,11 +34,6 @@ import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import java.io.ByteArrayOutputStream
-import java.io.ObjectOutputStream
-import java.nio.ByteBuffer
 
 import kotlin.math.pow
 import kotlin.math.sqrt
@@ -405,32 +401,25 @@ class HandLandmarkerHelper(
         val firstHandLandmarks = landmarksList.getOrNull(0)
         val secondHandLandmarks = landmarksList.getOrNull(1)
 
+        var worldLandmarkList = resultBundle.results.first().worldLandmarks()
+
+        val firstWorldHandLandmarks = worldLandmarkList.getOrNull(0)
+        val secondWorldHandLandmarks = worldLandmarkList.getOrNull(1)
+
         if(handType1 == "Left hand"){
-            LeftCalibration(firstHandLandmarks)
-            RightCalibration(secondHandLandmarks)
+            LeftCalibration(firstHandLandmarks, firstWorldHandLandmarks)
+            RightCalibration(secondHandLandmarks, secondWorldHandLandmarks)
         }else{
-            RightCalibration(firstHandLandmarks)
-            LeftCalibration(secondHandLandmarks)
+            RightCalibration(firstHandLandmarks, firstWorldHandLandmarks)
+            LeftCalibration(secondHandLandmarks, secondWorldHandLandmarks)
         }
 
-
-//        var worldLandmarksList = resultBundle.results.first().worldLandmarks()
-//        var firstWorldHandLandmarks = worldLandmarksList.getOrNull(0)
-//
-//        var xCordinate = firstWorldHandLandmarks?.get(4)?.x()
-//        var yCordinate = firstWorldHandLandmarks?.get(4)?.y()
-//
-//        Log.d("준엽", "x : $xCordinate, y : $yCordinate")
-
-//        var xLandCordinate = firstHandLandmarks?.get(4)?.x()
-//        var yLandCordinate = firstHandLandmarks?.get(4)?.y()
-//
-//       Log.d("민규", "x : $xLandCordinate, y : $yLandCordinate")
 
     }
 
 
     data class Point(val x: Float, val y: Float)
+    data class Point2(var x: Float?, var y:Float?)
 
     fun euclideanDistance(point1: Point, point2: Point): Double {
         var sum = 0.0
@@ -455,33 +444,32 @@ class HandLandmarkerHelper(
     @Serializable
     data class PointForBrodcast(val marknum: Int, val x: Float, val y: Float)
 
-    private fun RightCalibration(firstHandLandmarks: MutableList<NormalizedLandmark>?) {
+    private fun RightCalibration(
+        Landmarks: MutableList<NormalizedLandmark>?, // 손가락위치
+        worldLandmarks: MutableList<Landmark>?
+    ) {
 //    val calibratedValues = calibrate(firstHandLandmarks)
 
         // Ensure firstHandLandmarks is not null and contains at least 21 landmarks
-        if (firstHandLandmarks == null || firstHandLandmarks.size < 21) {
+        if (worldLandmarks == null || worldLandmarks.size < 21) {
 //            Log.d("준엽", "Invalid number of landmarks")
             return
         }
+        if( Landmarks == null || Landmarks.size <21){
+            return
+        }
 //
-        var distance0 = euclideanDistance(Point(firstHandLandmarks[4].x(), firstHandLandmarks[4].y()), Point(firstHandLandmarks[9].x(), firstHandLandmarks[9].y())) * 100
-        var distance1 = euclideanDistance(Point(firstHandLandmarks[8].x(), firstHandLandmarks[8].y()), Point(firstHandLandmarks[5].x(), firstHandLandmarks[5].y())) * 100
-        var distance2 = euclideanDistance(Point(firstHandLandmarks[12].x(), firstHandLandmarks[12].y()), Point(firstHandLandmarks[9].x(), firstHandLandmarks[9].y())) * 100
-        var distance3 = euclideanDistance(Point(firstHandLandmarks[16].x(), firstHandLandmarks[16].y()), Point(firstHandLandmarks[13].x(), firstHandLandmarks[13].y())) * 100
-        var distance4 = euclideanDistance(Point(firstHandLandmarks[20].x(), firstHandLandmarks[20].y()), Point(firstHandLandmarks[17].x(), firstHandLandmarks[17].y())) * 100
-
-        // var A = firstHandLandmarks[4].y()
-        // var B = firstHandLandmarks[3].y()
-        // var distance11 = A - B
-//        Log.d("지해", "검지 ,$distance1")
-//        Log.d("지해", "중지, $distance2")
-//        Log.d("지해", "약지, $distance3")
-//        Log.d("지해", "새끼, $distance4")
-
-        Log.d("지해", "$distance0")
+        var distance0 = euclideanDistance(Point(worldLandmarks[4].x(), worldLandmarks[4].y()), Point(worldLandmarks[9].x(), worldLandmarks[9].y())) * 100
+        var distance1 = euclideanDistance(Point(worldLandmarks[8].x(), worldLandmarks[8].y()), Point(worldLandmarks[5].x(), worldLandmarks[5].y())) * 100
+        var distance2 = euclideanDistance(Point(worldLandmarks[12].x(), worldLandmarks[12].y()), Point(worldLandmarks[9].x(), worldLandmarks[9].y())) * 100
+        var distance3 = euclideanDistance(Point(worldLandmarks[16].x(), worldLandmarks[16].y()), Point(worldLandmarks[13].x(), worldLandmarks[13].y())) * 100
+        var distance4 = euclideanDistance(Point(worldLandmarks[20].x(), worldLandmarks[20].y()), Point(worldLandmarks[17].x(), worldLandmarks[17].y())) * 100
 
 
-        if(distance0 < 11){
+        Log.d("지해", "$distance4")
+
+
+        if(distance0 < 3.2){
             if(!rcheck0){
                 Log.d("준엽", "오른손 엄지가 굽었습니다. $distance0")
                 serverManager?.broadcast("1! 1? 0? 0")
@@ -495,7 +483,7 @@ class HandLandmarkerHelper(
             rcheck0 = false;
         }
 
-         if(distance1 < 20.0)
+         if(distance1 < 3.0)
          {
             if(!rcheck1) {
                  Log.d("준엽", "오른손 1번째 손가락이 굽었습니다. $distance1")
@@ -509,7 +497,7 @@ class HandLandmarkerHelper(
              }
              rcheck1 = false;
          }
-         if(distance2 < 25.0)
+         if(distance2 < 5.0)
          {
             if(!rcheck2) {
                 Log.d("준엽", "오른손 2번째 손가락이 굽었습니다. $distance2")
@@ -524,7 +512,7 @@ class HandLandmarkerHelper(
             rcheck2 = false;
          }
 
-        if(distance3 < 20.0)
+        if(distance3 < 3.3)
         {
             if(!rcheck3) {
                 Log.d("준엽", "오른손 3번째 손가락이 굽었습니다. $distance3")
@@ -539,7 +527,7 @@ class HandLandmarkerHelper(
             rcheck3 = false;
         }
 
-        if(distance4 < 20.0)
+        if(distance4 < 3.2)
         {
             if(!rcheck4) {
                 Log.d("준엽", "오른손 4번째 손가락이 굽었습니다. $distance4")
@@ -554,20 +542,20 @@ class HandLandmarkerHelper(
             rcheck4 = false;
         }
 
-        var X4 = firstHandLandmarks[4].x()
-        var Y4 = firstHandLandmarks[4].y()
+        var X4 = Landmarks[4].x()
+        var Y4 = Landmarks[4].y()
 
-        var X8 = firstHandLandmarks[8].x()
-        var Y8 = firstHandLandmarks[8].y()
+        var X8 = Landmarks[8].x()
+        var Y8 = Landmarks[8].y()
 
-        var X12 = firstHandLandmarks[12].x()
-        var Y12 = firstHandLandmarks[12].y()
+        var X12 = Landmarks[12].x()
+        var Y12 = Landmarks[12].y()
 
-        var X16 = firstHandLandmarks[16].x()
-        var Y16 = firstHandLandmarks[16].y()
+        var X16 = Landmarks[16].x()
+        var Y16 = Landmarks[16].y()
 
-        var X20 = firstHandLandmarks[20].x()
-        var Y20 = firstHandLandmarks[20].y()
+        var X20 = Landmarks[20].x()
+        var Y20 = Landmarks[20].y()
 
         // list에 담아서 보내야함.
         var X = listOf(X4, X8, X12, X16, X20)
@@ -599,20 +587,26 @@ class HandLandmarkerHelper(
     var lcheck4 = false;
 
 
-    private fun LeftCalibration(secondHandLandmarks: MutableList<NormalizedLandmark>?) {
-        
-        if (secondHandLandmarks == null || secondHandLandmarks.size < 21) {
-            Log.d("준엽", "Invalid number of landmarks")
+    private fun LeftCalibration(
+        Landmarks: MutableList<NormalizedLandmark>?, // 손가락위치
+        worldLandmarks: MutableList<Landmark>?
+    ) {
+
+       if (worldLandmarks == null || worldLandmarks.size < 21) {
+//            Log.d("준엽", "Invalid number of landmarks")
+            return
+        }
+        if( Landmarks == null || Landmarks.size <21){
             return
         }
 
-        var distance0 = euclideanDistance(Point(secondHandLandmarks[4].x(), secondHandLandmarks[4].y()), Point(secondHandLandmarks[9].x(), secondHandLandmarks[9].y())) * 100
-        var distance1 = euclideanDistance(Point(secondHandLandmarks[8].x(), secondHandLandmarks[8].y()), Point(secondHandLandmarks[7].x(), secondHandLandmarks[7].y())) * 100
-        var distance2 = euclideanDistance(Point(secondHandLandmarks[12].x(), secondHandLandmarks[12].y()), Point(secondHandLandmarks[11].x(), secondHandLandmarks[11].y())) * 100
-        var distance3 = euclideanDistance(Point(secondHandLandmarks[16].x(), secondHandLandmarks[16].y()), Point(secondHandLandmarks[15].x(), secondHandLandmarks[15].y())) * 100
-        var distance4 = euclideanDistance(Point(secondHandLandmarks[20].x(), secondHandLandmarks[20].y()), Point(secondHandLandmarks[19].x(), secondHandLandmarks[19].y())) * 100
+        var distance0 = euclideanDistance(Point(worldLandmarks[4].x(), worldLandmarks[4].y()), Point(worldLandmarks[9].x(), worldLandmarks[9].y())) * 100
+        var distance1 = euclideanDistance(Point(worldLandmarks[8].x(), worldLandmarks[8].y()), Point(worldLandmarks[7].x(), worldLandmarks[7].y())) * 100
+        var distance2 = euclideanDistance(Point(worldLandmarks[12].x(), worldLandmarks[12].y()), Point(worldLandmarks[11].x(), worldLandmarks[11].y())) * 100
+        var distance3 = euclideanDistance(Point(worldLandmarks[16].x(), worldLandmarks[16].y()), Point(worldLandmarks[15].x(), worldLandmarks[15].y())) * 100
+        var distance4 = euclideanDistance(Point(worldLandmarks[20].x(), worldLandmarks[20].y()), Point(worldLandmarks[19].x(), worldLandmarks[19].y())) * 100
 
-        if(distance0 < 11){
+        if(distance0 < 3.2){
             if(!lcheck0) {
                 Log.d("준엽", "왼손 엄지가 굽었습니다. $distance0")
                 serverManager?.broadcast("1! 0? 0? 0")
@@ -626,7 +620,7 @@ class HandLandmarkerHelper(
             lcheck0 = false;
         }
 
-        if(distance1 < 20){
+        if(distance1 < 3){
             if(!lcheck1) {
                 Log.d("준엽", "왼손 1번째 손가락이 굽었습니다. $distance1")
                 serverManager?.broadcast("1! 0? 1? 0")
@@ -640,7 +634,7 @@ class HandLandmarkerHelper(
             lcheck1 = false;
         }
 
-        if(distance2 < 25){
+        if(distance2 < 5){
             if(!lcheck2) {
                 Log.d("준엽", "왼손 2번째 손가락이 굽었습니다. $distance2")
                 serverManager?.broadcast("1! 0? 2? 0")
@@ -654,7 +648,7 @@ class HandLandmarkerHelper(
             lcheck2 = false;
         }
 
-        if(distance3 < 20){
+        if(distance3 < 3.3){
             if(!lcheck3) {
                 Log.d("준엽", "왼손 3번째 손가락이 굽었습니다. $distance3")
                 serverManager?.broadcast("1! 0? 3? 0")
@@ -668,7 +662,7 @@ class HandLandmarkerHelper(
             lcheck3 = false;
         }
 
-        if(distance4 < 20){
+        if(distance4 < 3.2){
             if(!lcheck4) {
                 Log.d("준엽", "왼손 4번째 손가락이 굽었습니다. $distance4")
                 serverManager?.broadcast("1! 0? 4? 0")
@@ -682,20 +676,20 @@ class HandLandmarkerHelper(
             lcheck4 = false;
         }
         
-        var X4 = secondHandLandmarks[4].x()
-        var Y4 = secondHandLandmarks[4].y()
+        var X4 = Landmarks[4].x()
+        var Y4 = Landmarks[4].y()
 
-        var X8 = secondHandLandmarks[8].x()
-        var Y8 = secondHandLandmarks[8].y()
+        var X8 = Landmarks[8].x()
+        var Y8 = Landmarks[8].y()
 
-        var X12 = secondHandLandmarks[12].x()
-        var Y12 = secondHandLandmarks[12].y()
+        var X12 = Landmarks[12].x()
+        var Y12 = Landmarks[12].y()
 
-        var X16 = secondHandLandmarks[16].x()
-        var Y16 = secondHandLandmarks[16].y()
+        var X16 = Landmarks[16].x()
+        var Y16 = Landmarks[16].y()
 
-        var X20 = secondHandLandmarks[20].x()
-        var Y20 = secondHandLandmarks[20].y()
+        var X20 = Landmarks[20].x()
+        var Y20 = Landmarks[20].y()
 
         // list에 담아서 보내야함.
         var X = listOf(X4, X8, X12, X16, X20)
