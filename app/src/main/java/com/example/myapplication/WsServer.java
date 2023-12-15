@@ -14,7 +14,6 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import kotlinx.serialization.json.Json;
 
 public class WsServer extends WebSocketServer {
 
@@ -29,7 +28,9 @@ public class WsServer extends WebSocketServer {
     }
 
     public static WsServer init(String host, int port) {
-        return new WsServer(new InetSocketAddress(host, port));
+        WsServer wsserver = new WsServer(new InetSocketAddress(host, port));
+        wsserver.setReuseAddr(true);
+        return wsserver;
     }
 
     public void stopWithException() {
