@@ -483,7 +483,7 @@ class HandLandmarkerHelper(
             rcheck0 = false;
         }
 
-         if(distance1 < 3.0)
+         if(distance1 < 4.8)
          {
             if(!rcheck1) {
                  Log.d("준엽", "오른손 1번째 손가락이 굽었습니다. $distance1")
@@ -497,7 +497,7 @@ class HandLandmarkerHelper(
              }
              rcheck1 = false;
          }
-         if(distance2 < 5.0)
+         if(distance2 < 5.5)
          {
             if(!rcheck2) {
                 Log.d("준엽", "오른손 2번째 손가락이 굽었습니다. $distance2")
@@ -512,7 +512,7 @@ class HandLandmarkerHelper(
             rcheck2 = false;
          }
 
-        if(distance3 < 3.3)
+        if(distance3 < 5.0)
         {
             if(!rcheck3) {
                 Log.d("준엽", "오른손 3번째 손가락이 굽었습니다. $distance3")
@@ -527,7 +527,7 @@ class HandLandmarkerHelper(
             rcheck3 = false;
         }
 
-        if(distance4 < 3.2)
+        if(distance4 < 3.7)
         {
             if(!rcheck4) {
                 Log.d("준엽", "오른손 4번째 손가락이 굽었습니다. $distance4")
@@ -606,6 +606,8 @@ class HandLandmarkerHelper(
         var distance3 = euclideanDistance(Point(worldLandmarks[16].x(), worldLandmarks[16].y()), Point(worldLandmarks[15].x(), worldLandmarks[15].y())) * 100
         var distance4 = euclideanDistance(Point(worldLandmarks[20].x(), worldLandmarks[20].y()), Point(worldLandmarks[19].x(), worldLandmarks[19].y())) * 100
 
+//        Log.d("지해", "$distance1")
+
         if(distance0 < 3.2){
             if(!lcheck0) {
                 Log.d("준엽", "왼손 엄지가 굽었습니다. $distance0")
@@ -620,7 +622,7 @@ class HandLandmarkerHelper(
             lcheck0 = false;
         }
 
-        if(distance1 < 3){
+        if(distance1 < 1.2){
             if(!lcheck1) {
                 Log.d("준엽", "왼손 1번째 손가락이 굽었습니다. $distance1")
                 serverManager?.broadcast("1! 0? 1? 0")
@@ -634,7 +636,7 @@ class HandLandmarkerHelper(
             lcheck1 = false;
         }
 
-        if(distance2 < 5){
+        if(distance2 < 2.0){
             if(!lcheck2) {
                 Log.d("준엽", "왼손 2번째 손가락이 굽었습니다. $distance2")
                 serverManager?.broadcast("1! 0? 2? 0")
@@ -648,7 +650,7 @@ class HandLandmarkerHelper(
             lcheck2 = false;
         }
 
-        if(distance3 < 3.3){
+        if(distance3 < 1.5){
             if(!lcheck3) {
                 Log.d("준엽", "왼손 3번째 손가락이 굽었습니다. $distance3")
                 serverManager?.broadcast("1! 0? 3? 0")
@@ -662,7 +664,7 @@ class HandLandmarkerHelper(
             lcheck3 = false;
         }
 
-        if(distance4 < 3.2){
+        if(distance4 < 1.2){
             if(!lcheck4) {
                 Log.d("준엽", "왼손 4번째 손가락이 굽었습니다. $distance4")
                 serverManager?.broadcast("1! 0? 4? 0")
